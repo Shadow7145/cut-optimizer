@@ -230,72 +230,56 @@ function DonateWidget({ t, blockRef }: { t: Translations; blockRef?: RefObject<H
   return (
     <div
       ref={containerRef}
-      className="relative mx-3 mb-3 overflow-hidden rounded-[28px] border shadow-xl"
+      className="relative mx-3 mb-3 overflow-hidden rounded-2xl border shadow-lg"
       style={{
-        background: 'radial-gradient(circle at top left, rgba(255,255,255,0.92) 0%, rgba(224,242,254,0.96) 18%, rgba(199,242,217,0.96) 45%, rgba(99,204,135,0.94) 72%, rgba(67,56,202,0.92) 100%)',
-        borderColor: '#93c5fd',
-        boxShadow: '0 18px 40px rgba(67,56,202,0.16)',
+        background: 'linear-gradient(160deg, #f8fafc 0%, #eef2ff 45%, #ecfdf5 100%)',
+        borderColor: '#cbd5e1',
+        boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
       }}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/30 blur-2xl" />
-      <div className="pointer-events-none absolute -left-10 bottom-10 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-indigo-100/70 blur-2xl" />
+      <div className="pointer-events-none absolute -left-8 bottom-6 h-20 w-20 rounded-full bg-emerald-100/70 blur-2xl" />
 
       <div
-        className="relative flex items-center gap-2 px-3 py-3"
-        style={{ background: 'linear-gradient(90deg, rgba(49,46,129,0.9) 0%, rgba(37,99,78,0.78) 100%)' }}
+        className="relative flex items-center gap-2 px-3 py-2.5"
+        style={{ background: 'linear-gradient(90deg, #4f46e5 0%, #16a34a 100%)' }}
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/20 bg-white/12 text-lg shadow-sm backdrop-blur-sm">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-base shadow-sm">
           ☕
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-white font-black text-sm leading-tight tracking-[0.02em]">{t.donateTitle ?? 'Поддержать проект'}</div>
-          <div className="text-emerald-50/90 text-[10px] leading-tight whitespace-normal break-words">{t.donateSubtitle ?? 'Угостите кофе'}</div>
+          <div className="text-white font-black text-sm leading-tight">{t.donateTitle ?? 'Поддержать проект'}</div>
         </div>
-        <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/12 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-50 shadow-sm backdrop-blur-sm shrink-0">
-          <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.8)]" />
-          Sber
+        <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/12 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white shrink-0">
+          <span className="h-2 w-2 rounded-full bg-emerald-300" />
+          Сбер
         </div>
       </div>
 
-      <div className="relative flex flex-col items-center gap-3 px-3 py-4 text-center">
-        <div className="rounded-full border border-indigo-900/10 bg-white/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700">
-          Coffee fund
-        </div>
-
+      <div className="relative flex flex-col items-center gap-2 px-3 py-3 text-center">
         {qrDataUrl ? (
           <div
-            className="rounded-[24px] overflow-hidden border-[3px] bg-white shadow-2xl"
-            style={{ padding: 8, width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(219,234,254,0.92)' }}
+            className="rounded-2xl overflow-hidden border-2 bg-white shadow-lg"
+            style={{ padding: 6, width: qrSize + 12, height: qrSize + 12, borderColor: '#bfdbfe' }}
           >
             <img src={qrDataUrl} alt="QR СберБанк"
-              style={{ width: qrSize, height: qrSize, imageRendering: 'pixelated', display: 'block', borderRadius: 16 }} />
+              style={{ width: qrSize, height: qrSize, imageRendering: 'pixelated', display: 'block', borderRadius: 12 }} />
           </div>
         ) : (
           <div
-            className="rounded-[24px] border-2 border-dashed flex items-center justify-center bg-white/60"
-            style={{ width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(219,234,254,0.92)' }}
+            className="rounded-2xl border-2 border-dashed flex items-center justify-center bg-white/60"
+            style={{ width: qrSize + 12, height: qrSize + 12, borderColor: '#bfdbfe' }}
           >
             <span className="text-3xl">📱</span>
           </div>
         )}
 
-        <div className="space-y-1">
-          <div className="text-[11px] font-bold text-slate-800">📱 {t.donateScanHint ?? 'Сканируйте QR'}</div>
-          <div className="text-[10px] text-slate-700/80">SberBank Online</div>
+        <div className="text-[10px] font-semibold text-slate-700">
+          📱 {t.donateScanHint ?? 'Сканируйте QR'}
         </div>
 
-        <a
-          href={SBER_DONATE_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="w-full rounded-2xl px-3 py-2 text-[11px] font-bold text-white transition hover:brightness-105"
-          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 35%, #16a34a 100%)' }}
-        >
-          Открыть страницу доната
-        </a>
-
         <a href={`mailto:${FEEDBACK_EMAIL}`}
-          className="inline-flex items-center gap-1.5 text-[10px] text-slate-700 hover:text-slate-900 transition font-semibold mt-0.5">
+          className="inline-flex items-center gap-1.5 text-[10px] text-slate-600 hover:text-slate-900 transition font-semibold">
           <span>✉</span>
           <span className="underline underline-offset-2">{FEEDBACK_EMAIL}</span>
         </a>
