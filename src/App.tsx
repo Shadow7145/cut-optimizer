@@ -232,40 +232,40 @@ function DonateWidget({ t, blockRef }: { t: Translations; blockRef?: RefObject<H
       ref={containerRef}
       className="relative mx-3 mb-3 overflow-hidden rounded-[28px] border shadow-xl"
       style={{
-        background: 'radial-gradient(circle at top left, rgba(255,244,214,0.95) 0%, rgba(255,229,168,0.92) 24%, rgba(247,164,96,0.9) 56%, rgba(112,74,44,0.96) 100%)',
-        borderColor: '#f4c16e',
-        boxShadow: '0 18px 40px rgba(120,72,28,0.22)',
+        background: 'radial-gradient(circle at top left, rgba(255,255,255,0.92) 0%, rgba(224,242,254,0.96) 18%, rgba(199,242,217,0.96) 45%, rgba(99,204,135,0.94) 72%, rgba(67,56,202,0.92) 100%)',
+        borderColor: '#93c5fd',
+        boxShadow: '0 18px 40px rgba(67,56,202,0.16)',
       }}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/20 blur-2xl" />
-      <div className="pointer-events-none absolute -left-10 bottom-10 h-24 w-24 rounded-full bg-amber-100/30 blur-2xl" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/30 blur-2xl" />
+      <div className="pointer-events-none absolute -left-10 bottom-10 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl" />
 
       <div
         className="relative flex items-center gap-2 px-3 py-3"
-        style={{ background: 'linear-gradient(90deg, rgba(76,42,19,0.86) 0%, rgba(118,62,26,0.72) 100%)' }}
+        style={{ background: 'linear-gradient(90deg, rgba(49,46,129,0.9) 0%, rgba(37,99,78,0.78) 100%)' }}
       >
         <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/20 bg-white/12 text-lg shadow-sm backdrop-blur-sm">
           ☕
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-white font-black text-sm leading-tight tracking-[0.02em]">{t.donateTitle ?? 'Поддержать проект'}</div>
-          <div className="text-amber-100/85 text-[10px] leading-tight truncate">{t.donateSubtitle ?? 'Угостите кофе'}</div>
+          <div className="text-emerald-50/90 text-[10px] leading-tight whitespace-normal break-words">{t.donateSubtitle ?? 'Угостите кофе'}</div>
         </div>
-        <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/12 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-50 shadow-sm backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/12 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-50 shadow-sm backdrop-blur-sm shrink-0">
           <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.8)]" />
           Sber
         </div>
       </div>
 
       <div className="relative flex flex-col items-center gap-3 px-3 py-4 text-center">
-        <div className="rounded-full border border-amber-950/10 bg-black/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-950/80">
+        <div className="rounded-full border border-indigo-900/10 bg-white/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700">
           Coffee fund
         </div>
 
         {qrDataUrl ? (
           <div
             className="rounded-[24px] overflow-hidden border-[3px] bg-white shadow-2xl"
-            style={{ padding: 8, width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(255,248,235,0.85)' }}
+            style={{ padding: 8, width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(219,234,254,0.92)' }}
           >
             <img src={qrDataUrl} alt="QR СберБанк"
               style={{ width: qrSize, height: qrSize, imageRendering: 'pixelated', display: 'block', borderRadius: 16 }} />
@@ -273,15 +273,15 @@ function DonateWidget({ t, blockRef }: { t: Translations; blockRef?: RefObject<H
         ) : (
           <div
             className="rounded-[24px] border-2 border-dashed flex items-center justify-center bg-white/60"
-            style={{ width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(255,248,235,0.85)' }}
+            style={{ width: qrSize + 16, height: qrSize + 16, borderColor: 'rgba(219,234,254,0.92)' }}
           >
             <span className="text-3xl">📱</span>
           </div>
         )}
 
         <div className="space-y-1">
-          <div className="text-[11px] font-bold text-amber-950">📱 {t.donateScanHint ?? 'Сканируйте QR'}</div>
-          <div className="text-[10px] text-amber-950/70">SberBank Online</div>
+          <div className="text-[11px] font-bold text-slate-800">📱 {t.donateScanHint ?? 'Сканируйте QR'}</div>
+          <div className="text-[10px] text-slate-700/80">SberBank Online</div>
         </div>
 
         <a
@@ -289,13 +289,13 @@ function DonateWidget({ t, blockRef }: { t: Translations; blockRef?: RefObject<H
           target="_blank"
           rel="noreferrer"
           className="w-full rounded-2xl px-3 py-2 text-[11px] font-bold text-white transition hover:brightness-105"
-          style={{ background: 'linear-gradient(135deg, #3a2515 0%, #70492b 45%, #c67b2f 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 35%, #16a34a 100%)' }}
         >
           Открыть страницу доната
         </a>
 
         <a href={`mailto:${FEEDBACK_EMAIL}`}
-          className="inline-flex items-center gap-1.5 text-[10px] text-amber-950/80 hover:text-amber-950 transition font-semibold mt-0.5">
+          className="inline-flex items-center gap-1.5 text-[10px] text-slate-700 hover:text-slate-900 transition font-semibold mt-0.5">
           <span>✉</span>
           <span className="underline underline-offset-2">{FEEDBACK_EMAIL}</span>
         </a>
@@ -1644,65 +1644,65 @@ ${sheetBlocks}
           </div>
         </div>
 
-        <div className={`overflow-y-auto px-3 py-2 space-y-1 ${hasSpec ? 'flex-1 min-h-0' : 'shrink-0'}`}>
-          {specList.length === 0 && (
-            <p className="text-xs text-slate-400 mt-4 text-center">{t.noPartsAssigned}</p>
-          )}
-          {specList.map((p, i) => (
-            <div key={i} className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-              <div className="font-semibold text-sm text-green-800 truncate">{p.name}</div>
-              <div className="text-xs text-slate-500">{formatSize(p.width, p.height)} мм</div>
-              <div className="text-xs font-bold text-green-700 mt-0.5">× {p.count} {t.partsCount}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 space-y-2">
+          <div className="space-y-1">
+            {specList.length === 0 && (
+              <p className="text-xs text-slate-400 mt-4 text-center">{t.noPartsAssigned}</p>
+            )}
+            {specList.map((p, i) => (
+              <div key={i} className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                <div className="font-semibold text-sm text-green-800 truncate">{p.name}</div>
+                <div className="text-xs text-slate-500">{formatSize(p.width, p.height)} мм</div>
+                <div className="text-xs font-bold text-green-700 mt-0.5">× {p.count} {t.partsCount}</div>
+              </div>
+            ))}
+          </div>
+
+          {mode === 'auto' && hasOverflow && overflowParts.length > 0 && (
+            <div className="rounded-xl border-2 border-red-300 bg-red-50 overflow-hidden">
+              <div className="px-3 py-2 bg-red-500 flex items-center gap-2">
+                <span className="text-white text-sm">⚠</span>
+                <span className="text-white text-xs font-bold">{t.notFitPanelTitle}</span>
+              </div>
+              <div className="px-3 py-2">
+                <p className="text-[10px] text-red-600 mb-1.5 leading-snug">{t.notFitPanelHint}</p>
+                <div className="space-y-1">
+                  {overflowParts.map((p, i) => (
+                    <div key={i} className="bg-white border border-red-200 rounded-lg px-2 py-1.5">
+                      <div className="font-semibold text-xs text-red-800">{p.name || `${t.autoPartName} ${i + 1}`}</div>
+                      <div className="text-[10px] text-red-600">{p.width}×{p.height} мм × {p.qty} {t.partsCount}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
+          )}
+
+          {totalArea > 0 && (
+            <div className="py-3 border-t border-slate-200 space-y-1.5">
+              <div className="text-xs text-slate-500">{t.efficiencyCurrentSheet}</div>
+              <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div className="h-2.5 rounded-full transition-all duration-500"
+                  style={{ width: `${efficiency}%`, background: effColor(efficiency) }} />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold" style={{ color: effColor(efficiency) }}>{efficiency}%</span>
+                <span className="text-xs text-slate-400">{(totalPartArea / 1e6).toFixed(3)} / {(totalArea / 1e6).toFixed(3)} м²</span>
+              </div>
+              {sheetCuts > 0 && (
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                  <span className="text-xs text-slate-400">✂ {t.autoCutsLabel}</span>
+                  <span className="text-xs font-bold" style={{ color: cutsColor(sheetCuts) }}>~{sheetCuts}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Overflow panel in auto mode */}
-        {mode === 'auto' && hasOverflow && overflowParts.length > 0 && (
-          <div className="mx-3 mb-2 rounded-xl border-2 border-red-300 bg-red-50 overflow-hidden shrink-0">
-            <div className="px-3 py-2 bg-red-500 flex items-center gap-2">
-              <span className="text-white text-sm">⚠</span>
-              <span className="text-white text-xs font-bold">{t.notFitPanelTitle}</span>
-            </div>
-            <div className="px-3 py-2">
-              <p className="text-[10px] text-red-600 mb-1.5 leading-snug">{t.notFitPanelHint}</p>
-              <div className="space-y-1">
-                {overflowParts.map((p, i) => (
-                  <div key={i} className="bg-white border border-red-200 rounded-lg px-2 py-1.5">
-                    <div className="font-semibold text-xs text-red-800">{p.name || `${t.autoPartName} ${i + 1}`}</div>
-                    <div className="text-[10px] text-red-600">{p.width}×{p.height} мм × {p.qty} {t.partsCount}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="shrink-0 border-t border-slate-200 bg-white/95 backdrop-blur-sm pt-3">
+          <DonateWidget t={t} blockRef={leftSidebarRef} />
 
-        {totalArea > 0 && (
-          <div className="px-3 py-3 border-t border-slate-200 space-y-1.5 shrink-0">
-            <div className="text-xs text-slate-500">{t.efficiencyCurrentSheet}</div>
-            <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div className="h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${efficiency}%`, background: effColor(efficiency) }} />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold" style={{ color: effColor(efficiency) }}>{efficiency}%</span>
-              <span className="text-xs text-slate-400">{(totalPartArea / 1e6).toFixed(3)} / {(totalArea / 1e6).toFixed(3)} м²</span>
-            </div>
-            {sheetCuts > 0 && (
-              <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
-                <span className="text-xs text-slate-400">✂ {t.autoCutsLabel}</span>
-                <span className="text-xs font-bold" style={{ color: cutsColor(sheetCuts) }}>~{sheetCuts}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!hasSpec && <div className="flex-1" />}
-
-        <DonateWidget t={t} blockRef={leftSidebarRef} />
-
-        <div className="px-3 pb-3 space-y-1.5 shrink-0">
+          <div className="px-3 pb-3 space-y-1.5">
           <button onClick={saveProject} disabled={!sheets.length}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
             {t.saveProject}
@@ -1715,6 +1715,7 @@ ${sheetBlocks}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
             {t.printPdf}
           </button>
+          </div>
         </div>
       </aside>
 
