@@ -1,0 +1,28 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" rx="36" fill="#F8FAFC"/>
+  <rect x="34" y="34" width="1132" height="562" rx="28" fill="url(#bg)"/>
+  <rect x="84" y="96" width="484" height="438" rx="28" fill="#0F172A" fill-opacity="0.92"/>
+  <rect x="126" y="144" width="188" height="128" rx="18" fill="#22C55E"/>
+  <rect x="326" y="144" width="188" height="188" rx="18" fill="#60A5FA"/>
+  <rect x="126" y="284" width="188" height="188" rx="18" fill="#F59E0B"/>
+  <rect x="326" y="344" width="188" height="128" rx="18" fill="#F87171"/>
+  <path d="M314 208H326" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M220 272V284" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M220 472V492" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M514 238H560" stroke="#A5B4FC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M514 298H560" stroke="#A5B4FC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M514 358H560" stroke="#A5B4FC" stroke-width="10" stroke-linecap="round"/>
+  <text x="628" y="214" fill="#0F172A" font-size="72" font-family="Arial, Helvetica, sans-serif" font-weight="700">Cut Optimizer</text>
+  <text x="628" y="294" fill="#334155" font-size="38" font-family="Arial, Helvetica, sans-serif">Оптимизатор раскроя онлайн</text>
+  <text x="628" y="360" fill="#475569" font-size="28" font-family="Arial, Helvetica, sans-serif">ЛДСП • МДФ • Фанера • Листовые материалы</text>
+  <rect x="628" y="410" width="412" height="72" rx="20" fill="#EEF2FF"/>
+  <text x="658" y="456" fill="#4338CA" font-size="30" font-family="Arial, Helvetica, sans-serif" font-weight="700">Карта раскроя, КПД, отходы, PDF</text>
+  <text x="628" y="530" fill="#6366F1" font-size="26" font-family="Arial, Helvetica, sans-serif" font-weight="700">cutoptimizer.ru</text>
+  <defs>
+    <linearGradient id="bg" x1="34" y1="34" x2="1166" y2="596" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0E7FF"/>
+      <stop offset="0.52" stop-color="#ECFDF5"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+  </defs>
+</svg>
