@@ -183,6 +183,81 @@ function estimateCuts(parts: PackRect[], sw: number, sh: number): number {
   return xs.size + ys.size
 }
 
+function isGuillotineCuttable(parts: PackRect[], sw: number, sh: number): boolean {
+  const placed = parts.filter(r => r.type === 'part')
+  if (placed.length <= 1) return true
+
+  const memo = new Map<string, boolean>()
+
+  const canSplit = (subset: PackRect[], x0: number, y0: number, x1: number, y1: number): boolean => {
+    if (subset.length <= 1) return true
+
+    const key = `${x0}|${y0}|${x1}|${y1}|${subset
+      .map(r => `${r.x},${r.y},${r.width},${r.height},${r.name}`)
+      .sort()
+      .join(';')}`
+    const cached = memo.get(key)
+    if (cached !== undefined) return cached
+
+    const verticalCuts = Array.from(new Set(
+      subset.flatMap(r => [r.x, r.x + r.width]).filter(x => x > x0 && x < x1)
+    )).sort((a, b) => a - b)
+
+    for (const cutX of verticalCuts) {
+      const left: PackRect[] = []
+      const right: PackRect[] = []
+      let blocked = false
+
+      for (const rect of subset) {
+        if (rect.x + rect.width <= cutX) left.push(rect)
+        else if (rect.x >= cutX) right.push(rect)
+        else {
+          blocked = true
+          break
+        }
+      }
+
+      if (!blocked && left.length > 0 && right.length > 0 &&
+        canSplit(left, x0, y0, cutX, y1) &&
+        canSplit(right, cutX, y0, x1, y1)) {
+        memo.set(key, true)
+        return true
+      }
+    }
+
+    const horizontalCuts = Array.from(new Set(
+      subset.flatMap(r => [r.y, r.y + r.height]).filter(y => y > y0 && y < y1)
+    )).sort((a, b) => a - b)
+
+    for (const cutY of horizontalCuts) {
+      const top: PackRect[] = []
+      const bottom: PackRect[] = []
+      let blocked = false
+
+      for (const rect of subset) {
+        if (rect.y + rect.height <= cutY) top.push(rect)
+        else if (rect.y >= cutY) bottom.push(rect)
+        else {
+          blocked = true
+          break
+        }
+      }
+
+      if (!blocked && top.length > 0 && bottom.length > 0 &&
+        canSplit(top, x0, y0, x1, cutY) &&
+        canSplit(bottom, x0, cutY, x1, y1)) {
+        memo.set(key, true)
+        return true
+      }
+    }
+
+    memo.set(key, false)
+    return false
+  }
+
+  return canSplit(placed, 0, 0, sw, sh)
+}
+
 // ─── Guillotine Packer ────────────────────────────────────────────────────────
 // Priority: maximize wide remnant (prefer keeping sheet width intact)
 
@@ -483,9 +558,15 @@ function packOneSingleSheet(
     candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) })
   }
 
-  // Pick best
-  candidates.sort((a, b) => b.score - a.score)
-  const best = candidates[0]
+  if (algo !== 'all' && algo !== 'guillotine') {
+    const res = guillotinePackSingle(items, sw, sh, kerf)
+    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) - 0.001 })
+  }
+
+  const feasible = candidates.filter(c => isGuillotineCuttable(c.rects.filter(r => r.type === 'part'), sw, sh))
+  const pool = feasible.length > 0 ? feasible : candidates
+  pool.sort((a, b) => b.score - a.score)
+  const best = pool[0]
 
   const notFitItems = (best.notFitIdx ?? []).map(idx => items[idx])
 
