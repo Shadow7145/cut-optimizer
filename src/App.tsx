@@ -24,6 +24,7 @@ interface Sheet {
   name: string
   stockWidth: number
   stockHeight: number
+  kerf?: number
   rects: Rect[]
   cuts?: number
 }
@@ -275,6 +276,23 @@ const autoUid = () => autoRowId++
 let autoSheetRowId = 100
 const autoSheetUid = () => autoSheetRowId++
 
+const createDefaultAutoPart = (): AutoPartRow => ({
+  id: autoUid(),
+  name: '',
+  width: '',
+  height: '',
+  qty: '1',
+  allowRotate: true,
+})
+
+const createDefaultAutoSheet = (): AutoSheetConfig => ({
+  id: autoSheetUid(),
+  stockWidth: '2800',
+  stockHeight: '2070',
+  kerf: '4',
+  name: '',
+})
+
 interface AutoResult {
   sheetsCount: number
   eff: number
@@ -309,7 +327,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
 
   // Parts CRUD
   const addPart = () => {
-    setParts(p => [...p, { id: autoUid(), name: '', width: '', height: '', qty: '1', allowRotate: true }])
+    setParts(p => [...p, createDefaultAutoPart()])
     setResult(null)
   }
   const removePart = (id: number) => { setParts(p => p.filter(r => r.id !== id)); setResult(null) }
@@ -317,7 +335,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
     setParts(p => p.map(r => r.id === id ? { ...r, [field]: value } : r)); setResult(null)
   }
   const clearParts = () => {
-    setParts([{ id: autoUid(), name: '', width: '', height: '', qty: '1', allowRotate: true }])
+    setParts([createDefaultAutoPart()])
     setResult(null)
   }
 
@@ -332,11 +350,10 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
   const addSheetConfig = () => {
     const last = sheetConfigs[sheetConfigs.length - 1]
     setSheetConfigs(s => [...s, {
-      id: autoSheetUid(),
+      ...createDefaultAutoSheet(),
       stockWidth: last?.stockWidth ?? '2800',
       stockHeight: last?.stockHeight ?? '2070',
       kerf: last?.kerf ?? '4',
-      name: '',
     }])
     setResult(null)
   }
@@ -380,6 +397,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
           name: `${(primaryConfig.name.trim() || t.sheetNamePlaceholder)} ${i + 1}`,
           stockWidth: sw,
           stockHeight: sh,
+          kerf,
           cuts: ps.cuts,
           rects: ps.rects.map(r => ({ id: uid(), x: r.x, y: r.y, width: r.width, height: r.height, type: r.type, name: r.name })),
         }))
@@ -445,6 +463,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
             name: `${baseName} ${nextSheetNo}`,
             stockWidth: cfg.stockWidth,
             stockHeight: cfg.stockHeight,
+            kerf: cfg.kerf,
             cuts: ps.cuts,
             rects: ps.rects.map(r => ({ id: uid(), x: r.x, y: r.y, width: r.width, height: r.height, type: r.type, name: r.name })),
           }
@@ -898,10 +917,10 @@ export default function App() {
 
   // ── Auto mode lifted state ──
   const [autoParts, setAutoParts] = useState<AutoPartRow[]>([
-    { id: autoUid(), name: '', width: '', height: '', qty: '1', allowRotate: true },
+    createDefaultAutoPart(),
   ])
   const [autoSheets, setAutoSheets] = useState<AutoSheetConfig[]>([
-    { id: autoSheetUid(), stockWidth: '2800', stockHeight: '2070', kerf: '4', name: '' },
+    createDefaultAutoSheet(),
   ])
 
   const leftSidebarRef = useRef<HTMLDivElement>(null)
@@ -923,6 +942,11 @@ export default function App() {
     if (!activeSheetId) return
     saveHistoryAndSheets(sheets.map(s => s.id === activeSheetId ? { ...s, rects: nr } : s))
   }, [activeSheetId, sheets, saveHistoryAndSheets])
+
+  const updateActiveSheetMeta = useCallback((patch: Partial<Sheet>) => {
+    if (!activeSheetId) return
+    setSheets(prev => prev.map(s => s.id === activeSheetId ? { ...s, ...patch } : s))
+  }, [activeSheetId])
 
   const undo = useCallback(() => {
     setHistory(prev => {
@@ -946,6 +970,7 @@ export default function App() {
     const name = sheetName.trim() || `${t.sheetNamePlaceholder} ${sheets.length + 1}`
     saveHistoryAndSheets([...sheets, {
       id, name, stockWidth: w, stockHeight: h, cuts: 0,
+      kerf: Number(kerf) || 0,
       rects: [{ id: uid(), x: 0, y: 0, width: w, height: h, type: 'waste', name: '' }],
     }])
     setActiveSheetId(id); setSelectedId(null); setSnappedCutSize(null)
@@ -956,6 +981,7 @@ export default function App() {
     const ns = sheets.filter(s => s.id !== sheetId)
     saveHistoryAndSheets(ns)
     if (activeSheetId === sheetId) { setActiveSheetId(ns[ns.length - 1]?.id ?? null); setSelectedId(null) }
+    if (!ns.length) { setHasOverflow(false); setOverflowParts([]) }
   }
 
   const switchSheet = (sheetId: number) => {
@@ -969,6 +995,18 @@ export default function App() {
     setHasOverflow(overflow); setOverflowParts(notFit)
     zoomRef.current = 1; panRef.current = { x: 0, y: 0 }
   }, [sheets])
+
+  useEffect(() => {
+    if (mode !== 'manual' || !activeSheet) return
+    setKerf(String(activeSheet.kerf ?? 4))
+  }, [mode, activeSheetId, activeSheet])
+
+  useEffect(() => {
+    if (mode !== 'manual' || !activeSheet) return
+    const nextKerf = Number(kerf) || 0
+    if ((activeSheet.kerf ?? 0) === nextKerf) return
+    updateActiveSheetMeta({ kerf: nextKerf })
+  }, [kerf, mode, activeSheet, updateActiveSheetMeta])
 
   const performCut = useCallback((sizeOverride?: number) => {
     if (!selectedRect) return
@@ -1397,18 +1435,19 @@ export default function App() {
           setSheets(data.sheets); setHistory([])
           setActiveSheetId(data.sheets[0]?.id ?? null); setSelectedId(null); setSnappedCutSize(null)
           setKerf(String(data.kerf ?? 4))
+          setHasOverflow(false); setOverflowParts([])
           if (data.lang && translations[data.lang]) { setLang(data.lang); localStorage.setItem('cutLang', data.lang) }
           if (data.autoParts && data.autoParts.length > 0) {
             setAutoParts(data.autoParts)
             const maxId = Math.max(...data.autoParts.map(p => p.id))
             if (maxId >= autoRowId) autoRowId = maxId + 1
-          }
+          } else setAutoParts([createDefaultAutoPart()])
           if (data.autoSheets && data.autoSheets.length > 0) {
             setAutoSheets(data.autoSheets)
             const maxId = Math.max(...data.autoSheets.map(s => s.id))
             if (maxId >= autoSheetRowId) autoSheetRowId = maxId + 1
-          }
-          if (data.autoMode) setMode('auto')
+          } else setAutoSheets([createDefaultAutoSheet()])
+          setMode(data.autoMode ? 'auto' : 'manual')
           if (data.autoAddSheetsMode !== undefined) setAutoAddMode(data.autoAddSheetsMode)
           zoomRef.current = 1; panRef.current = { x: 0, y: 0 }
         } catch { alert(t.alertLoadError) }
@@ -1484,12 +1523,13 @@ export default function App() {
       const rows = Object.values(spec).map(p =>
         `<tr><td><b>${p.name}</b></td><td>${Math.round(p.width)}</td><td>${Math.round(p.height)}</td><td>${(p.width * p.height / 1e6).toFixed(4)}</td><td>${p.count}</td><td>${(p.width * p.height * p.count / 1e6).toFixed(4)}</td></tr>`
       ).join('')
+      const sheetKerf = sheet.kerf ?? (Number(kerf) || 0)
       const cutsInfo = (sheet.cuts ?? 0) > 0 ? `<span>✂ ${t.printCuts} <b style="color:#d97706">${sheet.cuts}</b></span>` : ''
       return `<div class="sheet-block">
         <h2>${sheet.name}</h2>
         <div class="sheet-info">
           <span>📐 ${sheet.stockWidth}×${sheet.stockHeight} мм</span>
-          <span>🪚 ${t.printSaw} <b>${kerf} мм</b></span>
+          <span>🪚 ${t.printSaw} <b>${sheetKerf} мм</b></span>
           <span>${t.printEff} <b style="color:#4f46e5">${eff}%</b></span>
           <span>🟩 ${parts.length} ${t.printSheetLabel}</span>
           ${cutsInfo}
