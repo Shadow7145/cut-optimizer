@@ -1684,8 +1684,6 @@ ${sheetBlocks}
         </div>
 
         <div className="shrink-0 border-t border-slate-200 bg-white/95 backdrop-blur-sm pt-3">
-          <DonateWidget t={t} blockRef={leftSidebarRef} />
-
           <div className="px-3 pb-3 space-y-1.5">
           <button onClick={saveProject} disabled={!sheets.length}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
@@ -1700,6 +1698,8 @@ ${sheetBlocks}
             {t.printPdf}
           </button>
           </div>
+
+          <DonateWidget t={t} blockRef={leftSidebarRef} />
         </div>
       </aside>
 
