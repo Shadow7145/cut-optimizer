@@ -1757,49 +1757,51 @@ ${sheetBlocks}
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b border-slate-200 flex-wrap shrink-0">
-          <button onClick={undo} disabled={!history.length} title={t.undoHint}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition">
-            {t.undo}
-          </button>
-          <button onClick={clearAll} disabled={!sheets.length} title={t.clearAllHint}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-white border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition">
-            {t.clearAll}
-          </button>
-          <button onClick={resetZoom} title={t.resetZoomHint}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 shadow-sm transition">
-            {t.resetZoom}
-          </button>
-          {mode === 'manual' && (
-            <div className="flex rounded-lg overflow-hidden border border-slate-300 shadow-sm">
-              {(['vertical', 'horizontal'] as CutDirection[]).map(dir => (
-                <button key={dir} onClick={() => { setCutDirection(dir); setSnappedCutSize(null) }} title={dir === 'vertical' ? t.vertHint : t.horizHint}
-                  className={`px-3 py-1.5 text-sm font-medium transition ${cutDirection === dir ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}>
-                  {dir === 'vertical' ? t.vertical : t.horizontal}
-                </button>
-              ))}
-            </div>
-          )}
-          {selectedRect && mode === 'manual' && (
-            <span className="px-3 py-1.5 rounded-lg text-sm bg-indigo-50 border border-indigo-200 text-indigo-700">
-              {t.selected} {formatSize(selectedRect.width, selectedRect.height)} мм{selectedRect.name ? ` — ${selectedRect.name}` : ''}
-            </span>
-          )}
-          {selectedRect && mode === 'manual' && displayCutSize !== null && (
-            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border font-mono font-bold
-              ${useManualInput ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-              ✂ {displayCutSize} мм {useManualInput ? (lang === 'ru' ? '(ручной)' : '(manual)') : ''}
-            </span>
-          )}
-          {/* Overflow badge in toolbar for auto mode */}
-          {mode === 'auto' && hasOverflow && (
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-red-100 border border-red-300 text-red-700 font-semibold animate-pulse">
-              ⚠ {t.autoNotFit}
-            </span>
-          )}
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0 min-w-0">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto whitespace-nowrap pr-1">
+            <button onClick={undo} disabled={!history.length} title={t.undoHint}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0">
+              {t.undo}
+            </button>
+            <button onClick={clearAll} disabled={!sheets.length} title={t.clearAllHint}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0">
+              {t.clearAll}
+            </button>
+            <button onClick={resetZoom} title={t.resetZoomHint}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 shadow-sm transition shrink-0">
+              {t.resetZoom}
+            </button>
+            {mode === 'manual' && (
+              <div className="flex rounded-lg overflow-hidden border border-slate-300 shadow-sm shrink-0">
+                {(['vertical', 'horizontal'] as CutDirection[]).map(dir => (
+                  <button key={dir} onClick={() => { setCutDirection(dir); setSnappedCutSize(null) }} title={dir === 'vertical' ? t.vertHint : t.horizHint}
+                    className={`px-2.5 py-1.5 text-sm font-medium transition ${cutDirection === dir ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}>
+                    {dir === 'vertical' ? t.vertical : t.horizontal}
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedRect && mode === 'manual' && (
+              <span className="px-2.5 py-1.5 rounded-lg text-sm bg-indigo-50 border border-indigo-200 text-indigo-700 min-w-0 max-w-[260px] truncate shrink">
+                {t.selected} {formatSize(selectedRect.width, selectedRect.height)} мм{selectedRect.name ? ` — ${selectedRect.name}` : ''}
+              </span>
+            )}
+            {selectedRect && mode === 'manual' && displayCutSize !== null && (
+              <span className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm border font-mono font-bold shrink-0
+                ${useManualInput ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                ✂ {displayCutSize} мм {useManualInput ? (lang === 'ru' ? '(ручной)' : '(manual)') : ''}
+              </span>
+            )}
+            {/* Overflow badge in toolbar for auto mode */}
+            {mode === 'auto' && hasOverflow && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm bg-red-100 border border-red-300 text-red-700 font-semibold animate-pulse shrink-0">
+                ⚠ {t.autoNotFit}
+              </span>
+            )}
+          </div>
           {selectedRect && mode === 'manual' && (
             <button onClick={deleteSelected} title={t.deleteHint}
-              className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-white border border-red-300 text-red-500 hover:bg-red-50 shadow-sm transition">
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm bg-white border border-red-300 text-red-500 hover:bg-red-50 shadow-sm transition shrink-0 whitespace-nowrap">
               {t.deleteFragment}
             </button>
           )}
