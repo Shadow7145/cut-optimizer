@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Host: https://cutoptimizer.ru
+Host: cutoptimizer.ru
 Sitemap: https://cutoptimizer.ru/sitemap.xml
