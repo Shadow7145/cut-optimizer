@@ -1,0 +1,17 @@
+{
+  "name": "Cut Optimizer",
+  "short_name": "CutOptimizer",
+  "description": "Онлайн оптимизатор раскроя листовых материалов с расчетом карт раскроя, отходов и КПД.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

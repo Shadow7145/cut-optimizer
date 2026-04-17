@@ -428,6 +428,7 @@ export const LANGUAGES: LangDef[] = [
 ]
 
 export function detectBrowserLang(): LangCode {
+  if (typeof navigator === 'undefined') return 'ru'
   const lang = navigator.language?.toLowerCase() ?? ''
   if (lang.startsWith('ru')) return 'ru'
   return 'en'
