@@ -663,16 +663,16 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
             /* Multi-sheet config */
             <>
               {/* Header row */}
-              <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(0,1fr) 72px 72px 48px 24px' }}>
-                <span className="text-[10px] text-slate-400 font-medium">{t.autoColSheetName}</span>
-                <span className="text-[10px] text-slate-400 font-medium">{t.autoColStockLength}</span>
-                <span className="text-[10px] text-slate-400 font-medium">{t.autoColStockWidth}</span>
-                <span className="text-[10px] text-slate-400 font-medium">{t.autoColKerf}</span>
+              <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(76px,1fr) 72px 72px 48px 24px' }}>
+                <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">{t.autoColSheetName}</span>
+                <span className="text-[10px] text-slate-400 font-medium text-center">{t.autoColStockLength}</span>
+                <span className="text-[10px] text-slate-400 font-medium text-center">{t.autoColStockWidth}</span>
+                <span className="text-[10px] text-slate-400 font-medium text-center">{t.autoColKerf}</span>
                 <span />
               </div>
               <div className="space-y-1">
                 {sheetConfigs.map((cfg, idx) => (
-                  <div key={cfg.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(0,1fr) 72px 72px 48px 24px' }}>
+                  <div key={cfg.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(76px,1fr) 72px 72px 48px 24px' }}>
                     <input type="text" value={cfg.name} onChange={e => updateSheetConfig(cfg.id, 'name', e.target.value)}
                       placeholder={`${t.sheetNamePlaceholder} ${idx + 1}`}
                       className="border border-slate-300 rounded px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 w-full min-w-0" />
@@ -734,17 +734,17 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
             <button onClick={clearParts} className="text-xs text-slate-400 hover:text-red-500 transition ml-1">{t.autoClearParts}</button>
           </div>
           {/* Column headers */}
-          <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(0,1fr) 56px 56px 48px 24px 24px' }}>
-            <span className="text-[10px] text-slate-400">{t.autoPartName}</span>
-            <span className="text-[10px] text-slate-400">{t.autoPartWidth}</span>
-            <span className="text-[10px] text-slate-400">{t.autoPartHeight}</span>
-            <span className="text-[10px] text-slate-400">{t.autoPartQty}</span>
+          <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(76px,1fr) 52px 52px 42px 24px 24px' }}>
+            <span className="text-[10px] text-slate-400 whitespace-nowrap">{t.autoPartName}</span>
+            <span className="text-[10px] text-slate-400 text-center">{t.autoPartWidth}</span>
+            <span className="text-[10px] text-slate-400 text-center">{t.autoPartHeight}</span>
+            <span className="text-[10px] text-slate-400 text-center">{t.autoPartQty}</span>
             <span className="text-[10px] text-slate-400 text-center" title={t.autoRotateHint}>↻</span>
             <span />
           </div>
           <div className="space-y-1">
             {parts.map(p => (
-              <div key={p.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(0,1fr) 56px 56px 48px 24px 24px' }}>
+              <div key={p.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(76px,1fr) 52px 52px 42px 24px 24px' }}>
                 <input type="text" value={p.name} onChange={e => updatePart(p.id, 'name', e.target.value)}
                   placeholder={`Д${p.id}`}
                   className="border border-slate-300 rounded px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 w-full min-w-0" />
