@@ -1,7 +1,7 @@
 {
-  "name": "Cut Optimizer",
+  "name": "Cut Optimizer — раскрой онлайн",
   "short_name": "CutOptimizer",
-  "description": "Онлайн оптимизатор раскроя листовых материалов с расчетом карт раскроя, отходов и КПД.",
+  "description": "Бесплатный онлайн калькулятор раскроя листовых материалов: ЛДСП, МДФ, фанера, металл.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -12,6 +12,18 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "apple touch icon"
     }
   ]
 }
