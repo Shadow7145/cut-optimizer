@@ -1108,7 +1108,7 @@ export default function App() {
     setLang(l); localStorage.setItem('cutLang', l)
   }, [])
 
-  const [mode, setMode] = useState<AppMode>('manual')
+  const [mode, setMode] = useState<AppMode>('auto')
   useSeo(lang, mode)
 
   // ── Auto mode state ──
@@ -1132,7 +1132,10 @@ export default function App() {
     const obs = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect
-        setCanvasSize({ w: Math.floor(width) - 8, h: Math.floor(height) - 8 })
+        setCanvasSize({
+          w: Math.max(280, Math.floor(width) - 8),
+          h: Math.max(220, Math.floor(height) - 8),
+        })
       }
     })
     obs.observe(el)
@@ -1172,6 +1175,8 @@ export default function App() {
   ])
 
   const leftSidebarRef = useRef<HTMLDivElement>(null)
+  const [mobileSpecOpen, setMobileSpecOpen] = useState(false)
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(true)
 
   const activeCutSize = useCallback((): number | null => {
     if (useManualInput) {
@@ -1827,7 +1832,6 @@ ${sheetBlocks}
     spec[key].count++
   })
   const specList = Object.values(spec)
-  const hasSpec = specList.length > 0
   const totalWasteArea = rects.filter(r => r.type === 'waste').reduce((s, r) => s + r.width * r.height, 0)
   const totalPartArea = specParts.reduce((s, r) => s + r.width * r.height, 0)
   const totalArea = totalWasteArea + totalPartArea
@@ -1842,11 +1846,11 @@ ${sheetBlocks}
 
   return (
     <>
-    <div className="flex h-screen bg-slate-100 font-sans text-slate-800 select-none overflow-hidden">
+    <div className="flex h-dvh min-h-0 flex-col bg-slate-100 font-sans text-slate-800 select-none overflow-hidden lg:h-screen lg:flex-row">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
       <aside ref={leftSidebarRef}
-        className="w-56 min-w-[224px] max-w-[224px] flex flex-col bg-white border-r border-slate-200 shadow-sm shrink-0">
+        className="hidden bg-white shadow-sm shrink-0 lg:flex lg:h-auto lg:w-56 lg:min-w-[224px] lg:max-w-[224px] lg:flex-col lg:border-r lg:border-slate-200">
 
         <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-white shrink-0">
           <div className="flex items-center gap-2">
@@ -1929,16 +1933,41 @@ ${sheetBlocks}
           </button>
           </div>
 
-          <DonateWidget t={t} blockRef={leftSidebarRef} />
+          <details className="group hidden lg:block">
+            <summary className="mx-3 mb-3 flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100">
+              <span>{t.donateTitle ?? 'Поддержать проект'}</span>
+              <span className="rounded-full bg-indigo-50 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
+                QR
+              </span>
+              <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
+                {lang === 'ru' ? 'Свернуть' : 'Close'}
+              </span>
+            </summary>
+            <DonateWidget t={t} blockRef={leftSidebarRef} />
+          </details>
+          <details className="group lg:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-sm font-bold text-slate-700">
+              <span>{t.donateTitle ?? 'Поддержать проект'}</span>
+              <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
+                QR
+              </span>
+              <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
+                {lang === 'ru' ? 'Свернуть' : 'Close'}
+              </span>
+            </summary>
+            <div className="pb-3">
+              <DonateWidget t={t} />
+            </div>
+          </details>
         </div>
       </aside>
 
       {/* ── CENTER ──────────────────────────────────────────────────────────── */}
-      <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
+      <main className="order-1 flex min-h-0 flex-1 min-w-0 flex-col overflow-hidden lg:order-none">
 
         {/* Tabs + mode switcher + language */}
-        <div className="flex items-center bg-white border-b border-slate-200 shadow-sm shrink-0">
-          <div className="flex items-end gap-1 flex-1 overflow-x-auto px-3 pt-2 pb-0 min-w-0">
+        <div className="flex flex-wrap items-center gap-y-1 bg-white border-b border-slate-200 shadow-sm shrink-0 lg:flex-nowrap">
+          <div className="order-2 flex w-full min-w-0 flex-1 items-end gap-1 overflow-x-auto px-3 pt-1 pb-0 lg:order-none lg:w-auto lg:pt-2">
             {sheets.map(s => {
               const sp = s.rects.filter(r => r.type === 'part')
               const sw = s.rects.filter(r => r.type === 'waste')
@@ -1969,11 +1998,24 @@ ${sheetBlocks}
             {!sheets.length && <span className="text-xs text-slate-400 py-2 px-1 whitespace-nowrap">{t.noSheets}</span>}
           </div>
 
-          <div className="px-3 py-1.5 shrink-0 border-l border-slate-100">
+          <div className="order-1 flex shrink-0 px-2 py-1.5 lg:hidden">
+            <div className="flex overflow-hidden rounded-lg border border-slate-300 shadow-sm">
+              <button onClick={() => { setMobileToolsOpen(true); setMobileSpecOpen(false) }}
+                className={`px-2.5 py-1 text-xs font-semibold transition ${mobileToolsOpen ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600'}`}>
+                {lang === 'ru' ? 'Панель' : 'Panel'}
+              </button>
+              <button onClick={() => { setMobileSpecOpen(true); setMobileToolsOpen(false) }}
+                className={`px-2.5 py-1 text-xs font-semibold transition ${mobileSpecOpen ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600'}`}>
+                {lang === 'ru' ? 'Специф.' : 'Spec'}
+              </button>
+            </div>
+          </div>
+
+          <div className="order-1 ml-auto px-2 py-1.5 shrink-0 border-l border-slate-100 lg:order-none lg:ml-0 lg:px-3">
             <div className="flex rounded-lg overflow-hidden border border-slate-300 shadow-sm">
               {(['manual', 'auto'] as AppMode[]).map(m => (
                 <button key={m} onClick={() => setMode(m)}
-                  className={`px-3 py-1 text-xs font-medium transition
+                  className={`px-2.5 py-1 text-xs font-medium transition sm:px-3
                     ${mode === m ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}>
                   {m === 'manual' ? `✏ ${t.modeManual}` : `⚡ ${t.modeAuto}`}
                 </button>
@@ -1981,31 +2023,31 @@ ${sheetBlocks}
             </div>
           </div>
 
-          <div className="px-3 py-1.5 shrink-0 border-l border-slate-100">
+          <div className="order-1 px-2 py-1.5 shrink-0 border-l border-slate-100 lg:order-none lg:px-3">
             <LangSelector lang={lang} t={t} onChange={handleLangChange} />
           </div>
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b border-slate-200 shrink-0 min-w-0">
+        <div className={`${mobileSpecOpen ? 'hidden lg:flex' : 'flex'} items-center gap-2 px-2 py-2 bg-slate-50 border-b border-slate-200 shrink-0 min-w-0 sm:px-3`}>
           <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto whitespace-nowrap pr-1">
             <button onClick={undo} disabled={!history.length} title={t.undoHint}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0">
+              className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0 sm:py-1.5">
               {t.undo}
             </button>
             <button onClick={clearAll} disabled={!sheets.length} title={t.clearAllHint}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0">
+              className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-sm bg-white border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition shrink-0 sm:py-1.5">
               {t.clearAll}
             </button>
             <button onClick={resetZoom} title={t.resetZoomHint}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 shadow-sm transition shrink-0">
+              className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-sm bg-white border border-slate-300 hover:bg-slate-50 shadow-sm transition shrink-0 sm:py-1.5">
               {t.resetZoom}
             </button>
             {mode === 'manual' && (
               <div className="flex rounded-lg overflow-hidden border border-slate-300 shadow-sm shrink-0">
                 {(['vertical', 'horizontal'] as CutDirection[]).map(dir => (
                   <button key={dir} onClick={() => { setCutDirection(dir); setSnappedCutSize(null) }} title={dir === 'vertical' ? t.vertHint : t.horizHint}
-                    className={`px-2.5 py-1.5 text-sm font-medium transition ${cutDirection === dir ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}>
+                    className={`px-2.5 py-2 text-sm font-medium transition sm:py-1.5 ${cutDirection === dir ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}>
                     {dir === 'vertical' ? t.vertical : t.horizontal}
                   </button>
                 ))}
@@ -2037,8 +2079,109 @@ ${sheetBlocks}
           )}
         </div>
 
+        {/* Mobile specification replaces canvas only on small screens */}
+        {mobileSpecOpen && (
+          <div className="flex-1 overflow-y-auto bg-slate-100 p-3 lg:hidden">
+            <div className="mb-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.specification}</div>
+                  <h2 className="mt-1 truncate text-lg font-black text-slate-800">{activeSheet?.name ?? t.noSheets}</h2>
+                </div>
+                {totalArea > 0 && (
+                  <div className="shrink-0 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-right">
+                    <div className="text-[10px] font-semibold text-indigo-500">{t.efficiencyCurrentSheet}</div>
+                    <div className="text-xl font-black" style={{ color: effColor(efficiency) }}>{efficiency}%</div>
+                  </div>
+                )}
+              </div>
+              {totalArea > 0 && (
+                <div className="mt-3">
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${efficiency}%`, background: effColor(efficiency) }} />
+                  </div>
+                  <div className="mt-1 flex justify-between text-xs text-slate-400">
+                    <span>{(totalPartArea / 1e6).toFixed(3)} м²</span>
+                    <span>{(totalArea / 1e6).toFixed(3)} м²</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {mode === 'auto' && hasOverflow && overflowParts.length > 0 && (
+              <div className="mb-3 rounded-2xl border-2 border-red-300 bg-red-50 p-3">
+                <div className="mb-2 text-sm font-black text-red-700">⚠ {t.notFitPanelTitle}</div>
+                <p className="mb-2 text-xs leading-relaxed text-red-600">{t.notFitPanelHint}</p>
+                <div className="space-y-2">
+                  {overflowParts.map((p, i) => (
+                    <div key={i} className="rounded-xl border border-red-200 bg-white px-3 py-2">
+                      <div className="font-semibold text-red-800">{p.name || `${t.autoPartName} ${i + 1}`}</div>
+                      <div className="text-xs text-red-600">{p.width}×{p.height} мм × {p.qty} {t.partsCount}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {specList.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-400">
+                  {t.noPartsAssigned}
+                </div>
+              ) : (
+                specList.map((p, i) => (
+                  <div key={i} className="rounded-2xl border border-green-200 bg-white p-3 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-base font-black text-green-800">{p.name}</div>
+                        <div className="mt-1 text-sm text-slate-500">{formatSize(p.width, p.height)} мм</div>
+                      </div>
+                      <div className="shrink-0 rounded-xl bg-green-50 px-3 py-2 text-center">
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-green-500">{t.partsCount}</div>
+                        <div className="text-lg font-black text-green-700">× {p.count}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={saveProject} disabled={!sheets.length}
+                  className="rounded-xl border border-indigo-200 bg-indigo-50 px-2 py-2 text-xs font-bold text-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                  {t.saveProject}
+                </button>
+                <button onClick={loadProject}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-xs font-bold text-slate-700">
+                  {t.loadProject}
+                </button>
+                <button onClick={printProject} disabled={!sheets.length}
+                  className="rounded-xl border border-amber-200 bg-amber-50 px-2 py-2 text-xs font-bold text-amber-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                  {t.printPdf}
+                </button>
+              </div>
+              <details className="group mt-2 border-t border-slate-100 pt-2">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-1 text-sm font-bold text-slate-700">
+                  <span>{t.donateTitle ?? 'Поддержать проект'}</span>
+                  <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
+                    QR
+                  </span>
+                  <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
+                    {lang === 'ru' ? 'Свернуть' : 'Close'}
+                  </span>
+                </summary>
+                <div className="pt-2">
+                  <DonateWidget t={t} />
+                </div>
+              </details>
+            </div>
+          </div>
+        )}
+
         {/* Canvas */}
-        <div ref={canvasContainerRef} className="flex-1 relative overflow-hidden">
+        <div ref={canvasContainerRef} className={`${mobileSpecOpen ? 'hidden lg:block' : 'block'} flex-1 relative overflow-hidden`}>
           <canvas
             ref={canvasRef}
             width={canvasSize.w}
@@ -2064,7 +2207,7 @@ ${sheetBlocks}
               <span>{t.notFitPanelHint}</span>
             </div>
           )}
-          <div className="absolute bottom-0 left-0 right-0 flex gap-2 text-xs text-slate-400 flex-wrap justify-center py-1 px-2 pointer-events-none"
+          <div className="hidden absolute bottom-0 left-0 right-0 gap-2 text-xs text-slate-400 flex-wrap justify-center py-1 px-2 pointer-events-none sm:flex"
             style={{ background: 'linear-gradient(to top, rgba(241,245,249,0.95), transparent)' }}>
             {mode === 'manual' ? <>
               <span>{t.hintClick}</span><span>·</span>
@@ -2086,19 +2229,21 @@ ${sheetBlocks}
       </main>
 
       {/* ── RIGHT PANEL ──────────────────────────────────────────────────────── */}
-      <aside className="w-80 min-w-[320px] max-w-[320px] flex flex-col bg-white border-l border-slate-200 shadow-sm shrink-0 overflow-hidden">
+      <aside className={`${mobileToolsOpen ? 'flex' : 'hidden'} order-2 h-[42dvh] min-h-[260px] w-full min-w-0 max-w-none flex-col overflow-hidden border-t border-slate-200 bg-white shadow-sm shrink-0 lg:order-none lg:flex lg:h-auto lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:border-l lg:border-t-0`}>
         {mode === 'auto' && (
-          <AutoPanel
-            t={t}
-            lang={lang}
-            onResult={handleAutoResult}
-            parts={autoParts}
-            setParts={setAutoParts}
-            sheetConfigs={autoSheets}
-            setSheetConfigs={setAutoSheets}
-            autoAddMode={autoAddMode}
-            setAutoAddMode={setAutoAddMode}
-          />
+          <div className="min-h-0 flex-1">
+            <AutoPanel
+              t={t}
+              lang={lang}
+              onResult={handleAutoResult}
+              parts={autoParts}
+              setParts={setAutoParts}
+              sheetConfigs={autoSheets}
+              setSheetConfigs={setAutoSheets}
+              autoAddMode={autoAddMode}
+              setAutoAddMode={setAutoAddMode}
+            />
+          </div>
         )}
 
         {mode === 'manual' && (
@@ -2346,6 +2491,21 @@ ${sheetBlocks}
 
           </div>
         )}
+
+        <details className="group shrink-0 border-t border-slate-200 bg-white lg:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 text-sm font-bold text-slate-700">
+            <span>{t.donateTitle ?? 'Поддержать проект'}</span>
+            <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
+              QR
+            </span>
+            <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
+              {lang === 'ru' ? 'Свернуть' : 'Close'}
+            </span>
+          </summary>
+          <div className="pb-3">
+            <DonateWidget t={t} />
+          </div>
+        </details>
       </aside>
     </div>
     <SeoContent lang={lang} />
