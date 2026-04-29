@@ -306,6 +306,26 @@ function cutsColor(cuts: number) {
   return '#dc2626'
 }
 
+const rectArea = (rect: { width: number; height: number }) => rect.width * rect.height
+const sheetStockArea = (sheet: Pick<Sheet, 'stockWidth' | 'stockHeight'>) => Math.max(0, sheet.stockWidth * sheet.stockHeight)
+const sheetPartArea = (sheet: Pick<Sheet, 'rects'>) =>
+  sheet.rects.filter(r => r.type === 'part').reduce((sum, rect) => sum + rectArea(rect), 0)
+const sheetWasteArea = (sheet: Pick<Sheet, 'stockWidth' | 'stockHeight' | 'rects'>) =>
+  Math.max(0, sheetStockArea(sheet) - sheetPartArea(sheet))
+const sheetEfficiency = (sheet: Pick<Sheet, 'stockWidth' | 'stockHeight' | 'rects'>) => {
+  const stockArea = sheetStockArea(sheet)
+  return stockArea > 0 ? Math.round((sheetPartArea(sheet) / stockArea) * 100) : 0
+}
+const sheetsPartArea = (items: Sheet[]) => items.reduce((sum, sheet) => sum + sheetPartArea(sheet), 0)
+const sheetsStockArea = (items: Sheet[]) => items.reduce((sum, sheet) => sum + sheetStockArea(sheet), 0)
+const sheetsWasteArea = (items: Sheet[]) => items.reduce((sum, sheet) => sum + sheetWasteArea(sheet), 0)
+const sheetsEfficiency = (items: Sheet[]) => {
+  const stockArea = sheetsStockArea(items)
+  return stockArea > 0 ? Math.round((sheetsPartArea(items) / stockArea) * 100) : 0
+}
+const sheetWidestRemnant = (sheet: Pick<Sheet, 'rects'>) =>
+  Math.max(0, ...sheet.rects.filter(r => r.type === 'waste').map(r => Math.max(r.width, r.height)))
+
 function snapToGrid(value: number, step: number, max: number): number {
   if (step <= 0) return Math.max(1, Math.min(max, Math.round(value)))
   const snapped = Math.round(value / step) * step
@@ -648,17 +668,12 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
           rects: ps.rects.map(r => ({ id: uid(), x: r.x, y: r.y, width: r.width, height: r.height, type: r.type, name: r.name })),
         }))
 
-        const allParts = newSheets.flatMap(s => s.rects.filter(r => r.type === 'part'))
-        const allWaste = newSheets.flatMap(s => s.rects.filter(r => r.type === 'waste'))
-        const partArea = allParts.reduce((a, r) => a + r.width * r.height, 0)
-        const wasteArea = allWaste.reduce((a, r) => a + r.width * r.height, 0)
-        const totalArea = partArea + wasteArea
-        const eff = totalArea > 0 ? Math.round((partArea / totalArea) * 100) : 0
+        const partArea = sheetsPartArea(newSheets)
+        const wasteArea = sheetsWasteArea(newSheets)
+        const eff = sheetsEfficiency(newSheets)
         const totalCuts = newSheets.reduce((s, sh) => s + (sh.cuts ?? 0), 0)
         const lastSheet = newSheets[newSheets.length - 1]
-        const widestRemnant = lastSheet
-          ? Math.max(0, ...lastSheet.rects.filter(r => r.type === 'waste').map(r => Math.max(r.width, r.height)))
-          : 0
+        const widestRemnant = lastSheet ? sheetWidestRemnant(lastSheet) : 0
 
         const notFitMap: Record<string, { name: string; width: number; height: number; qty: number }> = {}
         for (const nf of packResult.notFit) {
@@ -715,16 +730,12 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
           }
         })
 
-        const allParts = newSheets.flatMap(s => s.rects.filter(r => r.type === 'part'))
-        const allWaste = newSheets.flatMap(s => s.rects.filter(r => r.type === 'waste'))
-        const partArea = allParts.reduce((a, r) => a + r.width * r.height, 0)
-        const wasteArea = allWaste.reduce((a, r) => a + r.width * r.height, 0)
-        const eff = (partArea + wasteArea) > 0 ? Math.round((partArea / (partArea + wasteArea)) * 100) : 0
+        const partArea = sheetsPartArea(newSheets)
+        const wasteArea = sheetsWasteArea(newSheets)
+        const eff = sheetsEfficiency(newSheets)
         const totalCuts = newSheets.reduce((s, sh) => s + (sh.cuts ?? 0), 0)
         const lastSheet = newSheets[newSheets.length - 1]
-        const widestRemnant = lastSheet
-          ? Math.max(0, ...lastSheet.rects.filter(r => r.type === 'waste').map(r => Math.max(r.width, r.height)))
-          : 0
+        const widestRemnant = lastSheet ? sheetWidestRemnant(lastSheet) : 0
 
         const notFitMap: Record<string, { name: string; width: number; height: number; qty: number }> = {}
         for (const nf of pr.notFit) {
@@ -1715,11 +1726,7 @@ export default function App() {
     const sheetBlocks = sheets.map(sheet => {
       const sr = sheet.rects
       const parts = sr.filter(r => r.type === 'part')
-      const wasteRects = sr.filter(r => r.type === 'waste')
-      const wasteArea = wasteRects.reduce((s, r) => s + r.width * r.height, 0)
-      const partArea = parts.reduce((s, r) => s + r.width * r.height, 0)
-      const total = wasteArea + partArea
-      const eff = total > 0 ? Math.round((partArea / total) * 100) : 0
+      const eff = sheetEfficiency(sheet)
       const spec: Record<string, { name: string; width: number; height: number; count: number }> = {}
       parts.forEach(r => {
         const key = `${r.name}||${formatSize(r.width, r.height)}`
@@ -1797,10 +1804,9 @@ export default function App() {
     }).join('\n')
 
     const allParts = sheets.flatMap(s => s.rects.filter(r => r.type === 'part'))
-    const allWaste = sheets.flatMap(s => s.rects.filter(r => r.type === 'waste'))
-    const tPA = allParts.reduce((s, r) => s + r.width * r.height, 0)
-    const tWA = allWaste.reduce((s, r) => s + r.width * r.height, 0)
-    const tEff = (tPA + tWA) > 0 ? Math.round((tPA / (tPA + tWA)) * 100) : 0
+    const tPA = sheetsPartArea(sheets)
+    const tWA = sheetsWasteArea(sheets)
+    const tEff = sheetsEfficiency(sheets)
     const tCuts = sheets.reduce((s, sh) => s + (sh.cuts ?? 0), 0)
     const gSpec: Record<string, { name: string; width: number; height: number; count: number }> = {}
     allParts.forEach(r => {
@@ -1832,10 +1838,9 @@ ${sheetBlocks}
     spec[key].count++
   })
   const specList = Object.values(spec)
-  const totalWasteArea = rects.filter(r => r.type === 'waste').reduce((s, r) => s + r.width * r.height, 0)
-  const totalPartArea = specParts.reduce((s, r) => s + r.width * r.height, 0)
-  const totalArea = totalWasteArea + totalPartArea
-  const efficiency = totalArea > 0 ? Math.round((totalPartArea / totalArea) * 100) : 0
+  const totalPartArea = activeSheet ? sheetPartArea(activeSheet) : 0
+  const totalArea = activeSheet ? sheetStockArea(activeSheet) : 0
+  const efficiency = activeSheet ? sheetEfficiency(activeSheet) : 0
   const sheetCuts = activeSheet?.cuts ?? 0
 
   const displayCutSize = useManualInput
@@ -1969,11 +1974,7 @@ ${sheetBlocks}
         <div className="flex flex-wrap items-center gap-y-1 bg-white border-b border-slate-200 shadow-sm shrink-0 lg:flex-nowrap">
           <div className="order-2 flex w-full min-w-0 flex-1 items-end gap-1 overflow-x-auto px-3 pt-1 pb-0 lg:order-none lg:w-auto lg:pt-2">
             {sheets.map(s => {
-              const sp = s.rects.filter(r => r.type === 'part')
-              const sw = s.rects.filter(r => r.type === 'waste')
-              const pa = sp.reduce((a, r) => a + r.width * r.height, 0)
-              const wa = sw.reduce((a, r) => a + r.width * r.height, 0)
-              const eff = (pa + wa) > 0 ? Math.round((pa / (pa + wa)) * 100) : 0
+              const eff = sheetEfficiency(s)
               const sc = s.cuts ?? 0
               return (
                 <div key={s.id} onClick={() => switchSheet(s.id)}
@@ -2313,10 +2314,7 @@ ${sheetBlocks}
                 <div className="space-y-1">
                   {sheets.map(s => {
                     const sp = s.rects.filter(r => r.type === 'part')
-                    const sw = s.rects.filter(r => r.type === 'waste')
-                    const pa = sp.reduce((a, r) => a + r.width * r.height, 0)
-                    const wa = sw.reduce((a, r) => a + r.width * r.height, 0)
-                    const eff = (pa + wa) > 0 ? Math.round((pa / (pa + wa)) * 100) : 0
+                    const eff = sheetEfficiency(s)
                     return (
                       <div key={s.id} onClick={() => switchSheet(s.id)}
                         className={`cursor-pointer rounded-lg px-3 py-2 border transition text-xs

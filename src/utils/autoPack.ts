@@ -73,6 +73,39 @@ function pruneFreeRects(rects: FreeRect[]): FreeRect[] {
   )
 }
 
+function buildWasteRects(placed: PackRect[], sw: number, sh: number): PackRect[] {
+  const parts = placed.filter(r => r.type === 'part')
+  if (!parts.length) return [{ x: 0, y: 0, width: sw, height: sh, type: 'waste', name: '' }]
+
+  const xs = Array.from(new Set([0, sw, ...parts.flatMap(r => [r.x, r.x + r.width])]))
+    .filter(x => x >= 0 && x <= sw)
+    .sort((a, b) => a - b)
+  const ys = Array.from(new Set([0, sh, ...parts.flatMap(r => [r.y, r.y + r.height])]))
+    .filter(y => y >= 0 && y <= sh)
+    .sort((a, b) => a - b)
+
+  const waste: PackRect[] = []
+  for (let yi = 0; yi < ys.length - 1; yi++) {
+    for (let xi = 0; xi < xs.length - 1; xi++) {
+      const x = xs[xi]
+      const y = ys[yi]
+      const width = xs[xi + 1] - x
+      const height = ys[yi + 1] - y
+      if (width < 10 || height < 10) continue
+
+      const occupied = parts.some(part =>
+        x >= part.x &&
+        y >= part.y &&
+        x + width <= part.x + part.width &&
+        y + height <= part.y + part.height
+      )
+      if (!occupied) waste.push({ x, y, width, height, type: 'waste', name: '' })
+    }
+  }
+
+  return waste
+}
+
 type Heuristic = 'BSSF' | 'BLSF' | 'BAF' | 'BL' | 'CP'
 
 function scoreFreeRect(free: FreeRect, pw: number, ph: number, h: Heuristic): number {
@@ -116,10 +149,10 @@ function maxRectsPackSingle(
   kerf: number,
   heuristic: Heuristic,
   sortOrder: SortOrder,
-): { rects: PackRect[]; notFitIdx: number[]; placedCount: number } {
+): { rects: PackRect[]; notFitItems: PackItem[]; placedCount: number } {
   let freeRects: FreeRect[] = [{ x: 0, y: 0, w: sw, h: sh }]
   const placed: PackRect[] = []
-  const notFitIdx: number[] = []
+  const notFitItems: PackItem[] = []
   const sorted = sortItems(items, sortOrder)
 
   for (let i = 0; i < sorted.length; i++) {
@@ -142,7 +175,7 @@ function maxRectsPackSingle(
     }
 
     if (!bestFree) {
-      notFitIdx.push(i)
+      notFitItems.push(item)
       continue
     }
 
@@ -159,14 +192,11 @@ function maxRectsPackSingle(
     freeRects = pruneFreeRects(freeRects.flatMap(f => splitFree(f, usedRect)))
   }
 
-  // Build waste rects from remaining free rects (largest ones)
-  const wasteRects: PackRect[] = pruneFreeRects(freeRects)
-    .filter(f => f.w >= 10 && f.h >= 10)
-    .map(f => ({ x: f.x, y: f.y, width: f.w, height: f.h, type: 'waste' as const, name: '' }))
+  const wasteRects = buildWasteRects(placed, sw, sh)
 
   return {
     rects: [...placed, ...wasteRects],
-    notFitIdx,
+    notFitItems,
     placedCount: placed.length,
   }
 }
@@ -266,11 +296,11 @@ function guillotinePackSingle(
   sw: number,
   sh: number,
   kerf: number,
-): { rects: PackRect[]; notFitIdx: number[]; placedCount: number } {
+): { rects: PackRect[]; notFitItems: PackItem[]; placedCount: number } {
   // Sort by area desc for better packing
   const sorted = [...items].sort((a, b) => b.width * b.height - a.width * a.height)
   const placed: PackRect[] = []
-  const notFitIdx: number[] = []
+  const notFitItems: PackItem[] = []
 
   // Free rectangles, start with full sheet
   let freeRects: FreeRect[] = [{ x: 0, y: 0, w: sw, h: sh }]
@@ -300,7 +330,7 @@ function guillotinePackSingle(
       }
     }
 
-    if (bestFreeIdx < 0) { notFitIdx.push(i); continue }
+    if (bestFreeIdx < 0) { notFitItems.push(item); continue }
 
     if (bestRotated) { [pw, ph] = [ph, pw] }
     const free = freeRects[bestFreeIdx]
@@ -325,11 +355,9 @@ function guillotinePackSingle(
     freeRects = pruneFreeRects(freeRects)
   }
 
-  const wasteRects: PackRect[] = pruneFreeRects(freeRects)
-    .filter(f => f.w >= 10 && f.h >= 10)
-    .map(f => ({ x: f.x, y: f.y, width: f.w, height: f.h, type: 'waste' as const, name: '' }))
+  const wasteRects = buildWasteRects(placed, sw, sh)
 
-  return { rects: [...placed, ...wasteRects], notFitIdx, placedCount: placed.length }
+  return { rects: [...placed, ...wasteRects], notFitItems, placedCount: placed.length }
 }
 
 // ─── Strip Packer ─────────────────────────────────────────────────────────────
@@ -339,10 +367,10 @@ function stripPackSingle(
   sw: number,
   sh: number,
   kerf: number,
-): { rects: PackRect[]; notFitIdx: number[]; placedCount: number } {
+): { rects: PackRect[]; notFitItems: PackItem[]; placedCount: number } {
   const sorted = [...items].sort((a, b) => b.height - a.height || b.width - a.width)
   const placed: PackRect[] = []
-  const notFitIdx: number[] = []
+  const notFitItems: PackItem[] = []
 
   let curX = 0, curY = 0, rowH = 0
 
@@ -363,7 +391,7 @@ function stripPackSingle(
     }
 
     if (curX + pw > sw + kerf || curY + ph > sh + kerf) {
-      notFitIdx.push(i); continue
+      notFitItems.push(item); continue
     }
 
     placed.push({
@@ -376,19 +404,9 @@ function stripPackSingle(
     rowH = Math.max(rowH, ph)
   }
 
-  // Compute waste
-  const usedH = curY + rowH
-  const wasteRects: PackRect[] = []
-  if (usedH < sh) {
-    wasteRects.push({ x: 0, y: usedH, width: sw, height: sh - usedH, type: 'waste', name: '' })
-  }
+  const wasteRects = buildWasteRects(placed, sw, sh)
 
-  // Side waste in strips (simplified)
-  if (curX < sw && rowH > 0) {
-    wasteRects.push({ x: curX, y: curY, width: sw - curX, height: rowH, type: 'waste', name: '' })
-  }
-
-  return { rects: [...placed, ...wasteRects], notFitIdx, placedCount: placed.length }
+  return { rects: [...placed, ...wasteRects], notFitItems, placedCount: placed.length }
 }
 
 // ─── Skyline Packer ───────────────────────────────────────────────────────────
@@ -402,10 +420,10 @@ function skylinePackSingle(
   sw: number,
   sh: number,
   kerf: number,
-): { rects: PackRect[]; notFitIdx: number[]; placedCount: number } {
+): { rects: PackRect[]; notFitItems: PackItem[]; placedCount: number } {
   const sorted = [...items].sort((a, b) => b.width * b.height - a.width * a.height)
   const placed: PackRect[] = []
-  const notFitIdx: number[] = []
+  const notFitItems: PackItem[] = []
 
   let skyline: SkylineNode[] = [{ x: 0, y: 0, w: sw }]
 
@@ -443,7 +461,7 @@ function skylinePackSingle(
     const rot = item.allowRotate ? findBestPos(pwr, phr) : { bestY: Infinity, bestIdx: -1, bestX: 0 }
 
     let useRot = false
-    if (norm.bestIdx < 0 && rot.bestIdx < 0) { notFitIdx.push(i); continue }
+    if (norm.bestIdx < 0 && rot.bestIdx < 0) { notFitItems.push(item); continue }
     if (norm.bestIdx < 0) useRot = true
     else if (rot.bestIdx >= 0 && rot.bestY < norm.bestY) useRot = true
 
@@ -473,15 +491,9 @@ function skylinePackSingle(
     skyline = newSkyline
   }
 
-  // Build waste from skyline
-  const wasteRects: PackRect[] = []
-  for (const node of skyline) {
-    if (sh - node.y > 10 && node.w > 10) {
-      wasteRects.push({ x: node.x, y: node.y, width: node.w, height: sh - node.y, type: 'waste', name: '' })
-    }
-  }
+  const wasteRects = buildWasteRects(placed, sw, sh)
 
-  return { rects: [...placed, ...wasteRects], notFitIdx, placedCount: placed.length }
+  return { rects: [...placed, ...wasteRects], notFitItems, placedCount: placed.length }
 }
 
 // ─── Score a single-sheet pack result ─────────────────────────────────────────
@@ -524,7 +536,7 @@ function packOneSingleSheet(
 
   interface Candidate {
     rects: PackRect[]
-    notFitIdx: number[]
+    notFitItems: PackItem[]
     placedCount: number
     score: number
   }
@@ -537,7 +549,7 @@ function packOneSingleSheet(
         const res = maxRectsPackSingle(items, sw, sh, kerf, h, order)
         candidates.push({
           ...res,
-          score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast),
+          score: scoreResult(res.rects, sw, sh, res.notFitItems.length, isLast),
         })
       }
     }
@@ -545,22 +557,22 @@ function packOneSingleSheet(
 
   if (algo === 'all' || algo === 'guillotine') {
     const res = guillotinePackSingle(items, sw, sh, kerf)
-    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) })
+    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitItems.length, isLast) })
   }
 
   if (algo === 'all' || algo === 'strip') {
     const res = stripPackSingle(items, sw, sh, kerf)
-    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) })
+    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitItems.length, isLast) })
   }
 
   if (algo === 'all' || algo === 'skyline') {
     const res = skylinePackSingle(items, sw, sh, kerf)
-    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) })
+    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitItems.length, isLast) })
   }
 
   if (algo !== 'all' && algo !== 'guillotine') {
     const res = guillotinePackSingle(items, sw, sh, kerf)
-    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitIdx.length, isLast) - 0.001 })
+    candidates.push({ ...res, score: scoreResult(res.rects, sw, sh, res.notFitItems.length, isLast) - 0.001 })
   }
 
   const feasible = candidates.filter(c => isGuillotineCuttable(c.rects.filter(r => r.type === 'part'), sw, sh))
@@ -568,11 +580,9 @@ function packOneSingleSheet(
   pool.sort((a, b) => b.score - a.score)
   const best = pool[0]
 
-  const notFitItems = (best.notFitIdx ?? []).map(idx => items[idx])
-
   return {
     rects: best.rects,
-    notFitItems,
+    notFitItems: best.notFitItems,
     placedCount: best.placedCount,
   }
 }
@@ -600,6 +610,15 @@ export function autoPack(
     const result = packOneSingleSheet(remaining, sw, sh, kerf, algo, isLast)
 
     const cuts = estimateCuts(result.rects.filter(r => r.type === 'part'), sw, sh)
+    if (result.placedCount === 0) {
+      const notFitMap: Record<string, { name: string; width: number; height: number; qty: number }> = {}
+      for (const item of remaining) {
+        const key = `${item.name}||${item.width}||${item.height}`
+        if (!notFitMap[key]) notFitMap[key] = { ...item, qty: 0 }
+        notFitMap[key].qty++
+      }
+      return { sheets, notFit: Object.values(notFitMap) }
+    }
 
     sheets.push({
       rects: result.rects,
@@ -659,6 +678,7 @@ export function autoPackMultiSheet(
     const result = packOneSingleSheet(remaining, sw, sh, kerf, algo, willBeLastSheet)
 
     const cuts = estimateCuts(result.rects.filter(r => r.type === 'part'), sw, sh)
+    if (result.placedCount === 0) break
     sheets.push({ rects: result.rects, cuts, placedCount: result.placedCount })
 
     if (result.notFitItems.length === 0) {
