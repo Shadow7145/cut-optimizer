@@ -64,6 +64,13 @@ const uid = () => nextId++
 const formatSize = (w: number, h: number) =>
   `${Math.round(Math.max(w, h))}×${Math.round(Math.min(w, h))}`
 
+// User-entered names are inserted into the print document HTML.
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char] ?? char))
+}
+
 const PADDING = 24
 
 function effColor(eff: number) {
@@ -1462,12 +1469,12 @@ export default function App() {
       }
       const img = tmp.toDataURL('image/png')
       const rows = Object.values(spec).map(p =>
-        `<tr><td><b>${p.name}</b></td><td>${Math.round(p.width)}</td><td>${Math.round(p.height)}</td><td>${(p.width * p.height / 1e6).toFixed(4)}</td><td>${p.count}</td><td>${(p.width * p.height * p.count / 1e6).toFixed(4)}</td></tr>`
+        `<tr><td><b>${escapeHtml(p.name)}</b></td><td>${Math.round(p.width)}</td><td>${Math.round(p.height)}</td><td>${(p.width * p.height / 1e6).toFixed(4)}</td><td>${p.count}</td><td>${(p.width * p.height * p.count / 1e6).toFixed(4)}</td></tr>`
       ).join('')
       const sheetKerf = sheet.kerf ?? (Number(kerf) || 0)
       const cutsInfo = (sheet.cuts ?? 0) > 0 ? `<span>✂ ${t.printCuts} <b style="color:#d97706">${sheet.cuts}</b></span>` : ''
       return `<div class="sheet-block">
-        <h2>${sheet.name}</h2>
+        <h2>${escapeHtml(sheet.name)}</h2>
         <div class="sheet-info">
           <span>📐 ${sheet.stockWidth}×${sheet.stockHeight} мм</span>
           <span>🪚 ${t.printSaw} <b>${sheetKerf} мм</b></span>
@@ -1496,7 +1503,7 @@ export default function App() {
       gSpec[key].count++
     })
     const gRows = Object.values(gSpec).map(p =>
-      `<tr><td><b>${p.name}</b></td><td>${Math.round(p.width)}</td><td>${Math.round(p.height)}</td><td>${(p.width * p.height / 1e6).toFixed(4)}</td><td>${p.count}</td><td>${(p.width * p.height * p.count / 1e6).toFixed(4)}</td></tr>`
+      `<tr><td><b>${escapeHtml(p.name)}</b></td><td>${Math.round(p.width)}</td><td>${Math.round(p.height)}</td><td>${(p.width * p.height / 1e6).toFixed(4)}</td><td>${p.count}</td><td>${(p.width * p.height * p.count / 1e6).toFixed(4)}</td></tr>`
     ).join('')
     const html = `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"><title>${t.printTitle}</title><style>${PRINT_STYLE}</style></head><body>
 <h1>📐 ${t.printTitle}</h1>
