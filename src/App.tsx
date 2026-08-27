@@ -1,6 +1,5 @@
-import { useRef, useEffect, useState, useCallback, type CSSProperties, type Dispatch, type RefObject, type SetStateAction } from 'react'
+import { useRef, useEffect, useState, useCallback, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
 import { createPortal } from 'react-dom'
-import QRCode from 'qrcode'
 import { type LangCode, type Translations, LANGUAGES, translations, detectBrowserLang } from './i18n'
 import { autoPackMultiSheet, packFixedSheets, type FixedSheetConfig, type PackItem, type AlgorithmChoice, ALGORITHM_LABELS } from './utils/autoPack'
 
@@ -18,233 +17,6 @@ interface Rect {
 
 type CutDirection = 'vertical' | 'horizontal'
 type AppMode = 'manual' | 'auto'
-
-const SITE_URL = 'https://cutoptimizer.ru'
-
-const SEO_CONTENT = {
-  ru: {
-    titleManual: 'Раскрой онлайн: ЛДСП, МДФ, фанера, металл | Калькулятор и карта раскроя бесплатно',
-    titleAuto: 'Автоматический расчет карт раскроя онлайн: ЛДСП, МДФ, металл | Cut Optimizer',
-    descriptionManual: 'Бесплатный онлайн калькулятор раскроя листовых материалов: ЛДСП, МДФ, фанера, листы металла. Создавайте карты раскроя вручную, считайте отходы, КПД и количество резов.',
-    descriptionAuto: 'Оптимизатор раскроя онлайн: автоматический расчет карт раскроя ЛДСП, МДФ, фанеры и металла. Минимизация отходов, расчет количества резов и печать PDF бесплатно.',
-    keywords: 'раскрой онлайн лдсп, раскрой онлайн мдф, раскрой онлайн фанера, раскрой онлайн листа, калькулятор раскроя лдсп, раскрой листа металла онлайн, калькулятор раскроя листового металла, автоматический расчет карт раскроя, раскрой онлайн бесплатно, линейный раскрой онлайн',
-    heading: 'Cut Optimizer — Раскрой онлайн',
-    subheading: 'Бесплатный калькулятор и оптимизатор раскроя ЛДСП, МДФ, фанеры и листов металла',
-    intro: 'Профессиональный сервис для расчета раскроя листовых материалов. Автоматический расчет карт раскроя ЛДСП, МДФ, фанеры, пластика и металла. Оптимизация отходов, расчет КПД и количества резов в один клик.',
-    benefitsTitle: 'Преимущества онлайн раскроя',
-    benefits: [
-      'Бесплатный расчет раскроя онлайн без регистрации.',
-      'Автоматическая оптимизация карт раскроя ЛДСП, МДФ и металла.',
-      'Расчет КПД, площади отходов и общего количества резов.',
-      'Поддержка линейного и прямоугольного раскроя листовых материалов.',
-      'Сохранение проектов и экспорт карт раскроя в PDF для печати.',
-    ],
-    useCasesTitle: 'Популярные запросы',
-    useCases: [
-      'раскрой онлайн лдсп и мдф',
-      'калькулятор раскроя листа металла',
-      'автоматический расчет карт раскроя',
-      'раскрой листового материала онлайн',
-      'карта раскроя онлайн бесплатно',
-    ],
-    faqTitle: 'Частые вопросы по раскрою',
-    faq: [
-      {
-        question: 'Для каких материалов подходит Cut Optimizer?',
-        answer: 'Сервис подходит для ЛДСП, МДФ, фанеры, пластика, композита, стекломагниевых и других листовых материалов, где важны размеры заготовки, детали и ширина пропила.',
-      },
-      {
-        question: 'Можно ли автоматически оптимизировать раскрой по нескольким листам?',
-        answer: 'Да. Автоматический режим распределяет детали по одному или нескольким форматам листов, считает количество листов, КПД, отходы и примерное число резов.',
-      },
-      {
-        question: 'Подходит ли сервис для мебельного производства?',
-        answer: 'Да. Инструмент ориентирован на мебельщиков, цеха и частных мастеров, которым нужен быстрый расчет раскроя ЛДСП, фасадов, корпусов и других прямоугольных деталей.',
-      },
-    ],
-  },
-  en: {
-    titleManual: 'Online sheet cutting optimizer for plywood, MDF, chipboard and panel materials',
-    titleAuto: 'Automatic online cutting optimizer with layout, waste and efficiency calculation',
-    descriptionManual: 'Cut Optimizer helps you build manual cutting layouts for plywood, MDF, chipboard, plastic and other sheet materials. Save projects, print PDFs and reduce waste.',
-    descriptionAuto: 'Online cutting calculator with automatic part nesting across sheets, efficiency metrics, waste estimation and cut count. Useful for woodworking shops and panel processing.',
-    keywords: 'cut optimizer, sheet cutting optimizer, cutting layout online, chipboard cutting calculator, plywood cutting optimizer, nesting optimizer',
-    heading: 'Cut Optimizer',
-    subheading: 'Online sheet cutting optimizer for workshops, furniture makers and panel processing',
-    intro: 'The app calculates cutting layouts for chipboard, MDF, plywood, plastic and other sheet materials. You can build a layout manually or generate one automatically with kerf, sheet size and part rotation taken into account.',
-    benefitsTitle: 'Why this page matters for search',
-    benefits: [
-      'Online cutting optimization without installing desktop software.',
-      'Several packing algorithms with efficiency, waste and cut statistics.',
-      'Manual mode for precise control and auto mode for fast production planning.',
-      'Project export, PDF printing and a clear per-sheet part specification.',
-    ],
-    useCasesTitle: 'Relevant search intents',
-    useCases: [
-      'sheet cutting optimizer online',
-      'chipboard cutting calculator',
-      'plywood cutting layout generator',
-      'panel cutting planner',
-      'online nesting optimizer',
-    ],
-    faqTitle: 'Cutting FAQ',
-    faq: [
-      {
-        question: 'What materials can I optimize with Cut Optimizer?',
-        answer: 'It works for chipboard, MDF, plywood, plastics and other rectangular sheet materials where stock size, part size and kerf affect yield.',
-      },
-      {
-        question: 'Can it optimize parts across multiple sheets automatically?',
-        answer: 'Yes. Auto mode distributes parts across one or multiple sheet formats and reports sheet count, efficiency, waste and approximate cuts.',
-      },
-      {
-        question: 'Is it useful for furniture production?',
-        answer: 'Yes. The tool is designed for furniture shops, workshops and independent makers who need fast panel cutting layouts for cabinets, fronts and other rectangular parts.',
-      },
-    ],
-  },
-} as const
-
-function upsertMeta(selector: string, attrs: Record<string, string>) {
-  let el = document.head.querySelector(selector) as HTMLMetaElement | null
-  if (!el) {
-    el = document.createElement('meta')
-    document.head.appendChild(el)
-  }
-  Object.entries(attrs).forEach(([key, value]) => el!.setAttribute(key, value))
-}
-
-function upsertLink(selector: string, attrs: Record<string, string>) {
-  let el = document.head.querySelector(selector) as HTMLLinkElement | null
-  if (!el) {
-    el = document.createElement('link')
-    document.head.appendChild(el)
-  }
-  Object.entries(attrs).forEach(([key, value]) => el!.setAttribute(key, value))
-}
-
-function upsertJsonLd(id: string, payload: Record<string, unknown>) {
-  let el = document.head.querySelector(`#${id}`) as HTMLScriptElement | null
-  if (!el) {
-    el = document.createElement('script')
-    el.type = 'application/ld+json'
-    el.id = id
-    document.head.appendChild(el)
-  }
-  el.textContent = JSON.stringify(payload)
-}
-
-function useSeo(lang: LangCode, mode: AppMode) {
-  useEffect(() => {
-    const copy = SEO_CONTENT[lang]
-    const title = mode === 'auto' ? copy.titleAuto : copy.titleManual
-    const description = mode === 'auto' ? copy.descriptionAuto : copy.descriptionManual
-    const canonicalUrl = lang === 'ru' ? SITE_URL : `${SITE_URL}/?lang=en`
-    const faqEntities = copy.faq.map(item => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    }))
-
-    document.title = title
-    document.documentElement.lang = lang
-
-    upsertMeta('meta[name="description"]', { name: 'description', content: description })
-    upsertMeta('meta[name="keywords"]', { name: 'keywords', content: copy.keywords })
-    upsertMeta('meta[name="robots"]', { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' })
-    upsertMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' })
-    upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title })
-    upsertMeta('meta[property="og:description"]', { property: 'og:description', content: description })
-    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl })
-    upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Cut Optimizer' })
-    upsertMeta('meta[property="og:locale"]', { property: 'og:locale', content: lang === 'ru' ? 'ru_RU' : 'en_US' })
-    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: `${SITE_URL}/og-image.png` })
-    upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' })
-    upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title })
-    upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description })
-    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_URL}/og-image.png` })
-    upsertLink('link[rel="canonical"]', { rel: 'canonical', href: canonicalUrl })
-    upsertLink('link[rel="alternate"][hreflang="ru"]', { rel: 'alternate', hreflang: 'ru', href: SITE_URL })
-    upsertLink('link[rel="alternate"][hreflang="en"]', { rel: 'alternate', hreflang: 'en', href: `${SITE_URL}/?lang=en` })
-    upsertLink('link[rel="alternate"][hreflang="x-default"]', { rel: 'alternate', hreflang: 'x-default', href: SITE_URL })
-
-    upsertJsonLd('ld-webapp', {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'Cut Optimizer',
-      applicationCategory: 'BusinessApplication',
-      applicationSubCategory: 'Cutting Optimization Software',
-      operatingSystem: 'Any',
-      url: SITE_URL,
-      inLanguage: lang,
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'RUB',
-      },
-      description,
-      featureList: copy.benefits,
-    })
-
-    upsertJsonLd('ld-faq', {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqEntities,
-    })
-  }, [lang, mode])
-}
-
-function SeoContent({ lang }: { lang: LangCode }) {
-  const copy = SEO_CONTENT[lang]
-
-  return (
-    <section className="bg-white border-t border-slate-200">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="max-w-4xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-600">cutoptimizer.ru</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{copy.heading}</h1>
-          <p className="mt-3 text-lg text-slate-700">{copy.subheading}</p>
-          <p className="mt-4 text-base leading-7 text-slate-600">{copy.intro}</p>
-        </header>
-
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-          <article className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <h2 className="text-xl font-bold text-slate-900">{copy.benefitsTitle}</h2>
-            <ul className="mt-4 space-y-3 text-slate-700">
-              {copy.benefits.map(item => (
-                <li key={item} className="rounded-2xl bg-white px-4 py-3 shadow-sm">{item}</li>
-              ))}
-            </ul>
-          </article>
-
-          <aside className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6">
-            <h2 className="text-xl font-bold text-slate-900">{copy.useCasesTitle}</h2>
-            <ul className="mt-4 space-y-2 text-sm font-medium text-slate-700">
-              {copy.useCases.map(item => (
-                <li key={item} className="rounded-xl border border-white/80 bg-white/80 px-3 py-2">{item}</li>
-              ))}
-            </ul>
-          </aside>
-        </div>
-
-        <div className="mt-8 rounded-3xl border border-slate-200 p-6">
-          <h2 className="text-2xl font-bold text-slate-900">{copy.faqTitle}</h2>
-          <div className="mt-4 space-y-3">
-            {copy.faq.map(item => (
-              <details key={item.question} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <summary className="cursor-pointer list-none font-semibold text-slate-900">{item.question}</summary>
-                <p className="mt-2 text-slate-700">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 interface Sheet {
   id: number
@@ -441,96 +213,6 @@ function LangSelector({ lang, t, onChange }: { lang: LangCode; t: Translations; 
           ))}
         </div>, document.body
       )}
-    </div>
-  )
-}
-
-// ─── Donate Widget ────────────────────────────────────────────────────────────
-
-const SBER_DONATE_URL = 'https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79509193193&bankCode=100000000111'
-const FEEDBACK_EMAIL = 'jurandos@yandex.ru'
-
-function DonateWidget({ t, blockRef }: { t: Translations; blockRef?: RefObject<HTMLDivElement | null> }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
-  const [qrSize, setQrSize] = useState(120)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    QRCode.toDataURL(SBER_DONATE_URL, {
-      width: 300, margin: 1,
-      color: { dark: '#14532d', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-    }).then((url: string) => setQrDataUrl(url)).catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    const el = blockRef?.current ?? containerRef.current
-    if (!el) return
-    const obs = new ResizeObserver(() => {
-      const w = el.clientWidth
-      if (w > 40) setQrSize(Math.min(w - 32, 180))
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [blockRef])
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative mx-3 mb-3 overflow-hidden rounded-2xl border shadow-lg"
-      style={{
-        background: 'linear-gradient(160deg, #f8fafc 0%, #eef2ff 45%, #ecfdf5 100%)',
-        borderColor: '#cbd5e1',
-        boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
-      }}
-    >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-indigo-100/70 blur-2xl" />
-      <div className="pointer-events-none absolute -left-8 bottom-6 h-20 w-20 rounded-full bg-emerald-100/70 blur-2xl" />
-
-      <div
-        className="relative flex items-center gap-2 px-3 py-2.5"
-        style={{ background: 'linear-gradient(90deg, #4f46e5 0%, #16a34a 100%)' }}
-      >
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-base shadow-sm">
-          ☕
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-white font-black text-sm leading-tight">{t.donateTitle ?? 'Поддержать проект'}</div>
-        </div>
-        <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/12 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white shrink-0">
-          <span className="h-2 w-2 rounded-full bg-emerald-300" />
-          Сбер
-        </div>
-      </div>
-
-      <div className="relative flex flex-col items-center gap-2 px-3 py-3 text-center">
-        {qrDataUrl ? (
-          <div
-            className="rounded-2xl overflow-hidden border-2 bg-white shadow-lg"
-            style={{ padding: 6, width: qrSize + 12, height: qrSize + 12, borderColor: '#bfdbfe' }}
-          >
-            <img src={qrDataUrl} alt="QR СберБанк"
-              style={{ width: qrSize, height: qrSize, imageRendering: 'pixelated', display: 'block', borderRadius: 12 }} />
-          </div>
-        ) : (
-          <div
-            className="rounded-2xl border-2 border-dashed flex items-center justify-center bg-white/60"
-            style={{ width: qrSize + 12, height: qrSize + 12, borderColor: '#bfdbfe' }}
-          >
-            <span className="text-3xl">📱</span>
-          </div>
-        )}
-
-        <div className="text-[10px] font-semibold text-slate-700">
-          📱 {t.donateScanHint ?? 'Сканируйте QR'}
-        </div>
-
-        <a href={`mailto:${FEEDBACK_EMAIL}`}
-          className="inline-flex items-center gap-1.5 text-[10px] text-slate-600 hover:text-slate-900 transition font-semibold">
-          <span>✉</span>
-          <span className="underline underline-offset-2">{FEEDBACK_EMAIL}</span>
-        </a>
-      </div>
     </div>
   )
 }
@@ -1120,7 +802,6 @@ export default function App() {
   }, [])
 
   const [mode, setMode] = useState<AppMode>('auto')
-  useSeo(lang, mode)
 
   // ── Auto mode state ──
   const [autoAddMode, setAutoAddMode] = useState(true)
@@ -1937,33 +1618,6 @@ ${sheetBlocks}
             {t.printPdf}
           </button>
           </div>
-
-          <details className="group hidden lg:block">
-            <summary className="mx-3 mb-3 flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100">
-              <span>{t.donateTitle ?? 'Поддержать проект'}</span>
-              <span className="rounded-full bg-indigo-50 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
-                QR
-              </span>
-              <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
-                {lang === 'ru' ? 'Свернуть' : 'Close'}
-              </span>
-            </summary>
-            <DonateWidget t={t} blockRef={leftSidebarRef} />
-          </details>
-          <details className="group lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-sm font-bold text-slate-700">
-              <span>{t.donateTitle ?? 'Поддержать проект'}</span>
-              <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
-                QR
-              </span>
-              <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
-                {lang === 'ru' ? 'Свернуть' : 'Close'}
-              </span>
-            </summary>
-            <div className="pb-3">
-              <DonateWidget t={t} />
-            </div>
-          </details>
         </div>
       </aside>
 
@@ -2163,20 +1817,6 @@ ${sheetBlocks}
                   {t.printPdf}
                 </button>
               </div>
-              <details className="group mt-2 border-t border-slate-100 pt-2">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-1 text-sm font-bold text-slate-700">
-                  <span>{t.donateTitle ?? 'Поддержать проект'}</span>
-                  <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
-                    QR
-                  </span>
-                  <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
-                    {lang === 'ru' ? 'Свернуть' : 'Close'}
-                  </span>
-                </summary>
-                <div className="pt-2">
-                  <DonateWidget t={t} />
-                </div>
-              </details>
             </div>
           </div>
         )}
@@ -2489,24 +2129,8 @@ ${sheetBlocks}
 
           </div>
         )}
-
-        <details className="group shrink-0 border-t border-slate-200 bg-white lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 text-sm font-bold text-slate-700">
-            <span>{t.donateTitle ?? 'Поддержать проект'}</span>
-            <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-700 group-open:hidden">
-              QR
-            </span>
-            <span className="hidden rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-slate-500 group-open:inline">
-              {lang === 'ru' ? 'Свернуть' : 'Close'}
-            </span>
-          </summary>
-          <div className="pb-3">
-            <DonateWidget t={t} />
-          </div>
-        </details>
       </aside>
     </div>
-    <SeoContent lang={lang} />
     </>
   )
 }
