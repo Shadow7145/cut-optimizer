@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback, type CSSProperties, type Dispatch, type RefObject, type SetStateAction } from 'react'
+import { useRef, useEffect, useState, useCallback, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
 import { createPortal } from 'react-dom'
 import { type LangCode, type Translations, LANGUAGES, translations, detectBrowserLang } from './i18n'
 import { autoPackMultiSheet, packFixedSheets, type FixedSheetConfig, type PackItem, type AlgorithmChoice, ALGORITHM_LABELS } from './utils/autoPack'
