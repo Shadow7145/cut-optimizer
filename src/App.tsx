@@ -661,7 +661,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
             <button onClick={clearParts} className="text-xs text-slate-400 hover:text-red-500 transition ml-1">{t.autoClearParts}</button>
           </div>
           {/* Column headers */}
-          <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(64px,1fr) 52px 52px 56px 24px 24px' }}>
+          <div className="grid gap-1.5 mb-1" style={{ gridTemplateColumns: 'minmax(76px,1fr) 60px 60px 56px 24px 24px' }}>
             <span className="text-[10px] text-slate-400 whitespace-nowrap">{t.autoPartName}</span>
             <span className="text-[10px] text-slate-400 text-center">{t.autoPartWidth}</span>
             <span className="text-[10px] text-slate-400 text-center">{t.autoPartHeight}</span>
@@ -671,7 +671,7 @@ function AutoPanel({ t, lang, onResult, parts, setParts, sheetConfigs, setSheetC
           </div>
           <div className="space-y-1">
             {parts.map(p => (
-              <div key={p.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(64px,1fr) 52px 52px 56px 24px 24px' }}>
+              <div key={p.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: 'minmax(76px,1fr) 60px 60px 56px 24px 24px' }}>
                 <input type="text" value={p.name} onChange={e => updatePart(p.id, 'name', e.target.value)}
                   placeholder={`Д${p.id}`}
                   className="border border-slate-300 rounded px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 w-full min-w-0" />
@@ -1877,7 +1877,7 @@ ${sheetBlocks}
       </main>
 
       {/* ── RIGHT PANEL ──────────────────────────────────────────────────────── */}
-      <aside className={`${mobileToolsOpen ? 'flex' : 'hidden'} order-2 h-[42dvh] min-h-[260px] w-full min-w-0 max-w-none flex-col overflow-hidden border-t border-slate-200 bg-white shadow-sm shrink-0 lg:order-none lg:flex lg:h-auto lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:border-l lg:border-t-0`}>
+      <aside className={`${mobileToolsOpen ? 'flex' : 'hidden'} order-2 h-[42dvh] min-h-[260px] w-full min-w-0 max-w-none flex-col overflow-hidden border-t border-slate-200 bg-white shadow-sm shrink-0 lg:order-none lg:flex lg:h-auto lg:w-[360px] lg:min-w-[360px] lg:max-w-[360px] lg:border-l lg:border-t-0`}>
         {mode === 'auto' && (
           <div className="min-h-0 flex-1">
             <AutoPanel
