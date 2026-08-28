@@ -1,5 +1,11 @@
 # Cut Optimizer
 
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://unlicense.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646cff.svg)](https://vite.dev/)
+[![Single file](https://img.shields.io/badge/build-single--file-313KB-green.svg)](#production-сборка)
+
 Веб-приложение для ручного и автоматического раскроя листовых материалов. Подходит для ЛДСП, МДФ, фанеры, пластика, композита, металла и других прямоугольных заготовок.
 
 Приложение работает полностью в браузере и помогает построить карту раскроя, оценить использование материала, площадь отходов и примерное количество резов.
@@ -186,6 +192,15 @@ package.json            Зависимости и команды проекта
 # Cut Optimizer — English
 
 Cut Optimizer is a browser-based tool for manual and automatic cutting layouts of sheet materials such as chipboard, MDF, plywood, plastic, composite and metal.
+
+## Features
+
+- **Automatic nesting** — enter parts (name, dimensions, quantity), with optional 90° rotation, kerf width, and several packing algorithms (MaxRects, Guillotine, Strip, Skyline, Auto-best).
+- **Manual cutting** — create sheets of any size, cut vertically or horizontally, snap cuts to a configurable grid, name fragments, undo freely.
+- **Project workflow** — undo/redo, hotkeys, save/load as JSON, print or export the cutting map to PDF via the system dialog, summary specification, mobile-friendly UI.
+- **Browser-only** — no backend, no build of an API. Calculations and project state run entirely on the client.
+- **i18n** — Russian, English, Spanish, German, French, Chinese out of the box. The selected language is persisted in the browser.
+- **Single-file production build** — thanks to `vite-plugin-singlefile` the whole app ships as one self-contained `index.html` (~313 KB / ~92 KB gzip). Drop it on any static host (GitHub Pages, Vercel, Netlify, S3) or open it from disk.
 
 ## Project creation
 
