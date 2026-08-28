@@ -1,4 +1,4 @@
-export type LangCode = 'ru' | 'en'
+export type LangCode = 'ru' | 'en' | 'es' | 'de' | 'fr' | 'zh'
 
 export interface Translations {
   // Language
@@ -414,7 +414,14 @@ const en: Translations = {
   donateScanHint: 'Scan the QR code',
 }
 
-export const translations: Record<LangCode, Translations> = { ru, en }
+// Additional interface languages. English is used as a safe fallback for strings that
+// are not yet localized, so adding a language never leaves controls blank.
+const es: Translations = { ...en, language: 'Idioma', modeManual: 'Manual', modeAuto: 'Automático' }
+const de: Translations = { ...en, language: 'Sprache', modeManual: 'Manuell', modeAuto: 'Auto' }
+const fr: Translations = { ...en, language: 'Langue', modeManual: 'Manuel', modeAuto: 'Automatique' }
+const zh: Translations = { ...en, language: '语言', modeManual: '手动', modeAuto: '自动' }
+
+export const translations: Record<LangCode, Translations> = { ru, en, es, de, fr, zh }
 
 export interface LangDef {
   code: LangCode
@@ -425,11 +432,19 @@ export interface LangDef {
 export const LANGUAGES: LangDef[] = [
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
 ]
 
 export function detectBrowserLang(): LangCode {
   if (typeof navigator === 'undefined') return 'ru'
   const lang = navigator.language?.toLowerCase() ?? ''
   if (lang.startsWith('ru')) return 'ru'
+  if (lang.startsWith('es')) return 'es'
+  if (lang.startsWith('de')) return 'de'
+  if (lang.startsWith('fr')) return 'fr'
+  if (lang.startsWith('zh')) return 'zh'
   return 'en'
 }
