@@ -171,3 +171,65 @@ package.json            Зависимости и команды проекта
 Его можно бесплатно использовать, копировать, изменять, публиковать, распространять и продавать, в том числе в коммерческих проектах, без необходимости получать дополнительное разрешение или указывать автора.
 
 Полный текст лицензии находится в файле [`LICENSE`](LICENSE).
+
+---
+
+# Cut Optimizer — English
+
+Cut Optimizer is a browser-based tool for manual and automatic cutting layouts of sheet materials such as chipboard, MDF, plywood, plastic, composite and metal.
+
+## Quick start
+
+### Linux
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm
+git clone <repository-url>
+cd cut-optimizer
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite, usually `http://localhost:5173`.
+
+For a production build:
+
+```bash
+npm run check
+npm run build
+npm run preview
+```
+
+### Windows PowerShell
+
+Install the current Node.js LTS from https://nodejs.org, then run:
+
+```powershell
+git clone <repository-url>
+cd cut-optimizer
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite. For a production build:
+
+```powershell
+npm run check
+npm run build
+npm run preview
+```
+
+## Supported interface languages
+
+The interface includes Russian, English, Spanish, German, French and Chinese. Use the language selector in the top bar; the selected language is saved in the browser.
+
+## Public deployment with Vercel
+
+1. Import the GitHub repository into Vercel.
+2. Keep the framework preset as **Vite**.
+3. Set the build command to `npm run build`.
+4. Set the output directory to `dist` (or leave it to automatic detection).
+5. Deploy the project.
+
+Vercel provides HTTPS, CDN delivery and preview deployments automatically.
