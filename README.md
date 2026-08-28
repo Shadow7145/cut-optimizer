@@ -4,6 +4,15 @@
 
 Приложение работает полностью в браузере и помогает построить карту раскроя, оценить использование материала, площадь отходов и примерное количество резов.
 
+## Создание проекта
+
+Проект был создан с помощью нейросетей и при содействии следующих инструментов и моделей:
+
+- Claude Sonnet 4.6;
+- Google Gemini 3 Flash;
+- ChatGPT Codex;
+- Agent [arena.ai](https://arena.ai).
+
 ## Возможности
 
 ### Автоматический раскрой
@@ -177,6 +186,15 @@ package.json            Зависимости и команды проекта
 # Cut Optimizer — English
 
 Cut Optimizer is a browser-based tool for manual and automatic cutting layouts of sheet materials such as chipboard, MDF, plywood, plastic, composite and metal.
+
+## Project creation
+
+This project was created with the help of AI using the following tools and models:
+
+- Claude Sonnet 4.6;
+- Google Gemini 3 Flash;
+- ChatGPT Codex;
+- Agent [arena.ai](https://arena.ai).
 
 ## Quick start
 
