@@ -1,0 +1,27 @@
+# Dependabot configuration
+# Keeps dependencies up to date by opening pull requests.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    labels:
+      - "dependencies"
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+    # Don't bump major versions automatically — let a human review
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
